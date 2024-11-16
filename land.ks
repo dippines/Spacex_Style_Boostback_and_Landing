@@ -58,7 +58,7 @@ function getDynamicAOA {
         set maxAOA to 70*factor.
     } else if alt:radar > 20000 {
         set maxAOA to 50*factor.
-    } else if alt:radar > 15000 {
+    } else if alt:radar > 15000 {                    // factor decides the sign of the aoa, + corresponds to brake/adjust the impact positon, - corresponds to follow the trajectory without modifying it.
         set maxAOA to 20*factor.
     } else if alt:radar > 5000 {
         set maxAOA to 20.
