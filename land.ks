@@ -1,112 +1,99 @@
-// Script will change.
+SET kuniverse:defaultloaddistance:flying:LOAD TO 500000.   
+SET kuniverse:defaultloaddistance:flying:UNLOAD TO 500000. 
+SET kuniverse:defaultloaddistance:flying:UNPACK TO 500000. 
+SET kuniverse:defaultloaddistance:flying:PACK TO 500000.   
+SET kuniverse:defaultloaddistance:escaping:LOAD TO 500000.   
+SET kuniverse:defaultloaddistance:escaping:UNLOAD TO 500000. 
+SET kuniverse:defaultloaddistance:escaping:UNPACK TO 500000. 
+SET kuniverse:defaultloaddistance:escaping:PACK TO 500000.   
+SET kuniverse:defaultloaddistance:SUBORBITAL:LOAD TO 500000.   
+SET kuniverse:defaultloaddistance:SUBORBITAL:UNLOAD TO 500000. 
+SET kuniverse:defaultloaddistance:SUBORBITAL:UNPACK TO 500000. 
+SET kuniverse:defaultloaddistance:SUBORBITAL:PACK TO 500000.   
+SET kuniverse:defaultloaddistance:ORBIT:LOAD TO 500000.   
+SET kuniverse:defaultloaddistance:ORBIT:UNLOAD TO 500000. 
+SET kuniverse:defaultloaddistance:ORBIT:UNPACK TO 500000. 
+SET kuniverse:defaultloaddistance:ORBIT:PACK TO 500000.   
+SET kuniverse:defaultloaddistance:prelaunch:LOAD TO 500000.   
+SET kuniverse:defaultloaddistance:prelaunch:UNLOAD TO 500000. 
+SET kuniverse:defaultloaddistance:prelaunch:UNPACK TO 500000. 
+SET kuniverse:defaultloaddistance:prelaunch:PACK TO 500000.   
+SET kuniverse:defaultloaddistance:landed:LOAD TO 500000.   
+SET kuniverse:defaultloaddistance:landed:UNLOAD TO 500000. 
+SET kuniverse:defaultloaddistance:landed:UNPACK TO 500000. 
+SET kuniverse:defaultloaddistance:landed:PACK TO 500000.   
 
-lock steering to srfRetrograde. 
-// Variables 
 parameter landingsite is latlng(spot:lat,spot:lng).
-set radarOffset to 10.
-lock trueRadar to alt:radar - radarOffset.
-lock g to constant:g * body:mass / body:radius^2.
-lock maxDecel to (ship:availablethrust / ship:mass) - g.
-lock stopDist to (ship:verticalspeed^2 / (2 * maxDecel)) * 2.
-lock idealThrottle to stopDist / trueRadar.
-lock errorScaling to 10.
-lock gravityForce to ship:mass * g.
-set targetSpeed to -15.
-lock speedError to targetSpeed - ship:verticalspeed.
-lock throttleAdjustment to (speedError * ship:mass) / (ship:availablethrust + gravityForce).
-lock ApproachThrottle to throttleAdjustment.
+lock errorScaling to 1.
 
-// Functions
 function getImpact {
     if addons:tr:hasimpact { return addons:tr:impactpos. }
     return ship:geoposition.
-}
-
-function lngError {
-    return getImpact():lng - landingsite:lng.
-}
-
-function latError {
-    return getImpact():lat - landingsite:lat.
+    
 }
 
 function errorVector {
     return getImpact():position - landingsite:position.
 }
 
-function getDynamicAOA {
-
-    local errorVector is getimpact():position - landingsite:position.
-    local horizontalError is errorVector:mag.
-
-    if horizontalError < 400 { 
-        if throttle > 0 {
-            set factor to 1.
-            print"F".
-        } else {
-            set factor to -1.
-            print"P".
-        }
+function defAOA {
+    local vspeed is ship:verticalspeed. // vertical speed
+    local gspeed is ship:groundspeed. // ground speed
+    local h is alt:radar/apoapsis. // altitude ratio you might change apoapsis to the max alt that your ship had reach.
+    local t is (1-alt:radar/140000). // I forgot
+    local vm is vspeed/1500. // same
+    if throttle > 0 {
+        lock aoa to -1*(arctan(abs(vspeed/gspeed))*t*abs(vm)*h). // if the ship is thrusting booster need to tilt, might delete this
     } else {
-        set factor to 1.
-        print"F".
-    }   
-    
-        if alt:radar > 100000 {
-        set maxAOA to 90*factor.
-    } else if alt:radar > 50000 {
-        set maxAOA to 70*factor.
-    } else if alt:radar > 20000 {
-        set maxAOA to 50*factor.
-    } else if alt:radar > 15000 {                    // factor decides the sign of the aoa, + corresponds to brake/adjust the impact positon, - corresponds to follow the trajectory without modifying it.
-        set maxAOA to 20*factor.
-    } else if alt:radar > 5000 {
-        set maxAOA to 20.
-    } else if alt:radar > 1000 {
-        set maxAOA to -15.
-    } else {
-        set maxAOA to -5.
+        lock aoa to (arctan(abs(vspeed/gspeed))*t*abs(vm)*h). // main aoa calculus.
     }
-
-    local dynamicAOA is min(horizontalError, maxAOA).
-
-    return dynamicAOA.
+    return aoa.
 }
 
-function getSteering {
+function getSteering { // main steering function
     local errorVector is errorVector().
     local velVector is -ship:velocity:surface.
     local correctionVector to errorVector() * errorScaling.
     local result is velVector + correctionVector.
-    local aoa is getDynamicAOA(). 
+    local aoa is defAOA(). 
 
     if vang(result, velVector) > aoa {
         set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
     }
-
     return lookdirup(result, facing:topvector).
 }
 
+function thrust {
+lock targetspeed to -max(10, 100 + (alt:radar - 100) * (83 - 100) / (500 - 100)). // 83 m/s at 500m, 10 m/s at 100m. if you don't understand ask chatgpt or copilot.
+local gravityForce is ship:mass * constant:g * body:mass / body:radius^2. // gravity force of the ship
+local speedError is targetSpeed - ship:verticalspeed. // difference between the target speed and the current speed
+local ApproachThrottle is (speedError * ship:mass) / (ship:availablethrust + gravityForce). // Throttle calculation
 
-// Activation des systèmes de guidage
-lock throttle to 0.
-toggle rcs.
-wait until alt:radar <= 80000.
-lock steering to getSteering().
-rcs on.
-wait until alt:radar <= stopDist or alt:radar <=5000.
-lock steering to getSteering().
-lock throttle to idealThrottle.
-wait until ship:verticalspeed >= -150.
-toggle ag1.
-wait until alt:radar <= 700.
-lock throttle to ApproachThrottle.
-lock steering to getSteering().
+catch(). // Catching procedure
+    wait until alt:radar <1000. // Booster start landing at 1km
+        lock throttle to ApproachThrottle. // Throttle to ApproachThrottle
+        print "Altitude: " + alt:radar + " | Vitesse: " + ship:verticalspeed + " | Vitesse cible: " + targetspeed + " | Throttle: " + throttle.
 
-wait until ship:verticalspeed >= 0.
-lock throttle to 0.
-rcs off.
-lights off.
-brakes off.
- 
-shutdown.
+    wait until ship:verticalspeed >-80. // Three engines mode 
+        toggle ag1.// switching to three engines
+        toggle ag10.// vent
+        lock throttle to ApproachThrottle.
+    wait until ship:liquidfuel <=0. // booster continue thrusting until fuel is empty.
+}
+
+function catch {
+    local horizontalVelocity is ship:groundspeed. //The goal here is to kill horizontal velocity
+    local scaleFactor is min(1, alt:radar / 1000). //scale factor modify to fit your needs.
+    local tiltAngle is arctan(horizontalVelocity / max(1, abs(ship:verticalspeed))) * scaleFactor. // Tilt angle of the booster to kill horizontal velocity
+    lock steering to heading(landingsite:heading, 90 - tiltAngle). // main heading steering 
+}
+
+toggle ag10. //purge stop
+wait until alt:radar <=80000.
+lock steering to getSteering(). // steering to the landing site
+toggle ag3.// toggle gridfins 30°
+toggle ag5. // previous engine mode
+wait until alt:radar <=1500. // begin landing procedure
+thrust().
+wait until ship:liquidfuel <=0.// catched booster continue thrusting until fuel is empty.
+
