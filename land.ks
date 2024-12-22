@@ -1,3 +1,6 @@
+// I Highly suggest reading this in visual studio code 
+
+
 function ld {// load distances( visible tower and ship from 500km, camera feed etc)
 SET kuniverse:defaultloaddistance:flying:LOAD TO 500000.   
 SET kuniverse:defaultloaddistance:flying:UNLOAD TO 500000. 
