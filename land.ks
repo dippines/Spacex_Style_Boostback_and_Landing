@@ -1,6 +1,4 @@
 // I Highly suggest reading this in visual studio code 
-
-
 function ld {// load distances( visible tower and ship from 500km, camera feed etc)
 SET kuniverse:defaultloaddistance:flying:LOAD TO 500000.   
 SET kuniverse:defaultloaddistance:flying:UNLOAD TO 500000. 
@@ -58,30 +56,35 @@ function getSteering { // main steering function
     return lookdirup(result, facing:topvector).
 }
 
-function thrust {
-    lock m to ship:mass. // mass
+function vs { // the goal here is to kill vertical velocity by thrusting smoothly
+    local m is ship:mass. // mass
     local g is constant:g. // gravity
-    lock vi to max(-sqrt(1.5 * g * alt:radar), -5). // desired speed
-    local d is 928. // distance to stop
-    lock fm to ship:availablethrust. // thrust
-    lock f to m*g. // force
-    lock a to (vi^2)/(2*d). // acceleration
-    lock fe to m*a. // force to stop
-    lock ft to f-fe. // force to thrust
-    lock thr to ft/fm. // throttle
-    catch(). // Catching procedure
-    wait until alt:radar <1000. // Booster start landing at 1km
-        lock throttle to thr.
-    wait until ship:verticalspeed >-80. // Three engines mode 
-        toggle ag1.// switching to three engines
-        toggle ag10.// vent
-        lock throttle to thr.
-        toggle ag2.// undo gridfins
-    wait until ship:liquidfuel <=0. // booster continue thrusting until fuel is empty.
+    local p is m * g. // weight   
+    set VELOCITY_TOLERANCE to 0.1. // Tolérance de vitesse verticale.
+    until ABS(SHIP:VERTICALSPEED) < VELOCITY_TOLERANCE {
+
+        local svp is -SHIP:VERTICALSPEED.
+        local cv is alt:radar/1000. //correction vector depending on the altitude (alt lowering => thrust lowering => smooth landing)
+        local corthr is (svp * cv). // corrected thrust
+        local totalThrust to p + corthr. // total thrust
+
+        if totalThrust > SHIP:MAXTHRUST {
+            set totalThrust to SHIP:MAXTHRUST. // Infinity thrust protection
+        } else if totalThrust < 0 { // Normally you should have landed (normally)
+            set totalThrust to 0.
+        }
+        if ship:verticalspeed >=-80 {
+            hv(). // Catching procedure
+            toggle ag1.// switching to three engines
+            toggle ag10.// vent
+            toggle ag2.// undo gridfins
+            LOCK THROTTLE TO totalThrust / SHIP:MAXTHRUST. // Throttle
+        } else { LOCK THROTTLE TO totalThrust / SHIP:MAXTHRUST. } // 13 engines throttle
+    }
 }
 
-function catch {
-    local horizontalVelocity is ship:groundspeed. //The goal here is to kill horizontal velocity
+function hv {
+    local horizontalVelocity is ship:groundspeed. //The goal here is to kill horizontal velocity by tilting the booster
     local scaleFactor is min(1, alt:radar / 1000). //scale factor modify to fit your needs.
     local tiltAngle is arctan(horizontalVelocity / max(1, abs(ship:verticalspeed))) * scaleFactor. // Tilt angle of the booster to kill horizontal velocity
     lock steering to heading(landingsite:heading, up:forevector:mag-tiltAngle). // main heading steering 
@@ -93,5 +96,5 @@ lock steering to getSteering(). // steering to the landing site
 toggle ag3.// toggle gridfins 30°
 toggle ag5. // previous engine mode
 wait until alt:radar <=1500. // begin landing procedure
-thrust().
+vs().
 wait until ship:liquidfuel <=0.// catched booster continue thrusting until fuel is empty.
