@@ -8,13 +8,10 @@ PRINT spot:LAT.
 PRINT spot:LNG.
 toggle ag2.
 wait until alt:radar >=63000.
-lock throttle to 0.5.
-wait until alt:radar >=63000.
 toggle ag1.
-lock throttle to 0.2.
+lock throttle to 1.
 wait until alt:radar >=64000.
 toggle ag1.
-lock throttle to 0.1.
 wait until alt:radar >=69500.
 
 SET kuniverse:defaultloaddistance:flying:LOAD TO 500000.   
@@ -44,7 +41,7 @@ SET kuniverse:defaultloaddistance:landed:PACK TO 500000.
 
 
 
-lock throttle to 0.1.
+lock throttle to 1.
 if ADDONS:TR:AVAILABLE {
     			if ADDONS:TR:HASIMPACT {
        			 PRINT ADDONS:TR:IMPACTPOS.
