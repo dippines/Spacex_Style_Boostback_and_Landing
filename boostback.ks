@@ -1,19 +1,7 @@
-My boostback and landing are an edit of the one from edwin robert.
+My boostback and landing are an edit of the one from edwin robert, I used it for a solid base but my plan is for it to work on any ship, I'd say job is 80% done, still need more precision especially in the land (now it's 10-100m on superheavy).
 // Works in RSS, never tried in stock but is more likely to work.
 Clearscreen.
-SET spot TO LATLNG(latitude,longitude).
-//JRTI : 28.5388641357422,-77.8600616455078
-//LZ2 : 28.499088440369,-80.5358512374503
-PRINT spot:LAT.
-PRINT spot:LNG.
-toggle ag2.
-wait until alt:radar >=63000.
-toggle ag1.
-lock throttle to 1.
-wait until alt:radar >=64000.
-toggle ag1.
-wait until alt:radar >=69500.
-
+function ld {// load distances( visible tower and ship from 500km, camera feed etc)
 SET kuniverse:defaultloaddistance:flying:LOAD TO 500000.   
 SET kuniverse:defaultloaddistance:flying:UNLOAD TO 500000. 
 SET kuniverse:defaultloaddistance:flying:UNPACK TO 500000. 
@@ -38,10 +26,21 @@ SET kuniverse:defaultloaddistance:landed:LOAD TO 500000.
 SET kuniverse:defaultloaddistance:landed:UNLOAD TO 500000. 
 SET kuniverse:defaultloaddistance:landed:UNPACK TO 500000. 
 SET kuniverse:defaultloaddistance:landed:PACK TO 500000.   
+}
 
-
-
+ld().
+Clearscreen.
+toggle ag2.
+wait until alt:radar >=63000.
+toggle ag1.
 lock throttle to 1.
+wait until alt:radar >=64000.
+toggle ag1.
+lock throttle to 1.
+wait until alt:radar >=69500.
+lock steering to srfprograde.
+
+lock throttle to 0.5.
 if ADDONS:TR:AVAILABLE {
     			if ADDONS:TR:HASIMPACT {
        			 PRINT ADDONS:TR:IMPACTPOS.
@@ -51,7 +50,6 @@ if ADDONS:TR:AVAILABLE {
 			} else {
    			 PRINT "Trajectories is not available.".
 			}
-SET runMode to 0.
 
 when throttle = 0 then { 
       set STEERINGMANAGER:MAXSTOPPINGTIME to 15.
@@ -67,13 +65,14 @@ preserve.
 }
 RCS on.
 SAS off.
-SET landingpad TO latlng(spot:lat, spot:lng). //change to your landing pad latitude and longitude
-SET targetDistOld TO 0.
-SET landingpoint TO ADDONS:TR:IMPACTPOS.
+if hastarget {
+    set landingpad to latlng(target:geoposition:lat, target:geoposition:lng).
+} else {
+    set landingpad to latlng(getimpact:lat, getimpact:lng).
+}
 set lngoff to (landingpad:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472.
 set latoff to (landingpad:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472.
 RCS on.
-
 lock steering to heading ((landingpad:heading-180), 40).     //all this is used to get around the problem of kOS' slow and inefficient steering problem
 wait 0.5.
 lock throttle to  0.1.
@@ -105,12 +104,12 @@ wait 0.5.
 lock steering to heading (landingpad:heading, 10).
 wait 0.5.
 lock steering to heading (landingpad:heading, 0).
-wait 7.
+wait 10.
 toggle ag5.
 lock throttle to 1.
-wait 2.
+wait 10.
 toggle ag8.
-wait until ship:liquidfuel <= 20000.
+wait until ship:liquidfuel <= 15000.
 toggle ag9.
 
 when altitude > 4000 then {
@@ -146,7 +145,5 @@ preserve.
 }
 
 wait until ship:verticalspeed < -5.
-print "Boostback burn succesful". 
 wait until ship:verticalspeed < 300.
-print"Superheavy go for tower catch.".
 run land.
