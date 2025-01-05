@@ -1,5 +1,3 @@
-My boostback and landing are an edit of the one from edwin robert, I used it for a solid base but my plan is for it to work on any ship, I'd say job is 80% done, still need more precision especially in the land (now it's 10-100m on superheavy).
-// Works in RSS, never tried in stock but is more likely to work.
 
 function ld {// load distances( visible tower and ship from 500km, camera feed etc)
 SET kuniverse:defaultloaddistance:flying:LOAD TO 500000.   
@@ -29,8 +27,6 @@ SET kuniverse:defaultloaddistance:landed:PACK TO 500000.
 }
 ld().
 Clearscreen.
-wait until hastarget.
-print "Target is " + target:name.
 
 when alt:radar >=65000 then {
   toggle ag1.
@@ -76,7 +72,8 @@ preserve.
 
 RCS ON.
 SAS off.
-set landingpad to latlng(target:geoposition:lat, target:geoposition:lng). //target coordinates
+if hastarget {set landingpad to latlng(target:geoposition:lat, target:geoposition:lng).}     
+    else {set landingpad to latlng(28.6370253021226,-80.6014334665529). }
 set lngoff to (landingpad:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472. // longitude offset in meter 
 set latoff to (landingpad:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472. // latitude offset in meter
 lock steering to heading ((landingpad:heading-180), 40).     //all this is used to get around the problem of kOS' slow and inefficient steering problem
@@ -153,13 +150,13 @@ when lngoff >= -1.5 then {
 When throttle > 0 then { 
 
 when latoff < -20 then {
-lock steering to heading (landingpad:Heading - 2,0.1).
+lock steering to heading (landingpad:Heading - 2,-0.05).
 preserve.
 }
 
 when latoff > 20 then {
 
-lock steering to heading (landingpad:heading + 2, 0.1).
+lock steering to heading (landingpad:heading + 2, -0.05). // Slightly negative to kill vertical velocity like a near-nul retrograde
 preserve.
 }
 }
