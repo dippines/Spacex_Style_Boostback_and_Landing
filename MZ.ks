@@ -14,12 +14,28 @@ function catch {
 }
 
 function angle {  // Target angle
-set Mechazilla to ship:partsnamed("SLE.SS.OLIT.MZ")[0].
+
+  set Mechazilla to ship:partsnamed("SLE.SS.OLIT.MZ")[0].
         set MZANG to Mechazilla:getmodule("ModuleSLEController").
-        lock v2 to vessel("Heavy Booster"):geoposition:position-ship:geoposition:position. // vector pointing toward booster
-        print "target direction : " + v2:direction. // print the direction of the vector
-        print "target angle : "+v2:direction:pitch. // The pitch value of that direction is the value of the target angle
-  MZANG:setfield("target angle",v2:direction:pitch).
+        lock r1 to ship:geoposition:position-vessel("Heavy Booster"):geoposition:position.// vector pointing toward booster
+        lock tarang to r1:direction:pitch. // The pitch value of the v1 direction is the value of the target angle
+        lock v1 to vessel("Heavy Booster"):position:y.
+      if tarang >=113.6 { // Arms full open angle
+        lock tar to tarang/10.
+      } else {// This part is because of i think is a bug where the pitch value when a certain alt is reached make like a *10 this cause the arms to go on a direction and kick the booster.
+        lock tar to tarang.
+      }
+
+      if v1 >= 0 {
+        lock s to -1.
+        print "sign value : -".
+      } else {    // The sign of the angle i have no idea how i found that and might even be wrong but it seems to work
+        lock s to 1.  
+        print "sign value : +".
+      }
+      
+      print "target angle : " + (tar-8). // 8 is angle offset see SLE Github for more info
+    MZANG:setfield("target angle",(s*tar)-8).
 }
 
 function h {  // Target height
