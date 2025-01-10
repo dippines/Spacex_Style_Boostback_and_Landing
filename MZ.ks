@@ -25,3 +25,8 @@ function angle {  // Target angle
   MZANG:setfield("target angle",ang).
 }
 
+function stlz { // Landing rails, pushers and extension setup for rapid reuse WIP
+when ship:verticalspeed >=-5 then { toggle ag3.}
+
+
+}
