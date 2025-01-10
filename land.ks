@@ -54,7 +54,7 @@ Set outMin to 0.
 Set dt to 0.1.
 Set count to 0.
 Set previousError to desiredAltitude - alt:radar.
-Until ship:verticalspeed >=-80{
+Until ship:verticalspeed >=-100{
     mechazilla().
 	Set error to desiredAltitude - alt:radar.
 	Set integral to integral + (error * dt).
@@ -80,12 +80,10 @@ Until ship:verticalspeed >=-80{
 
 function land{
     set toTargetVector to (landingsite:position - ship:position):normalized. // Vector pointing from the ship to the target
-    set steeringStrength to 0.004.
+    set steeringStrength to 0.003.
     set steeringVector to ship:up:vector + steeringStrength * toTargetVector.
     set steeringVectorDir to steeringVector:direction.
-    lock steering to R(steeringVectorDir:pitch, steeringVectorDir:yaw, 90).
-    print "error vector" + (getImpact():position:mag - landingsite:position:mag).
-}
+    lock steering to R(steeringVectorDir:pitch, steeringVectorDir:yaw, -90).}
 
 function vectorInclude {
 parameter included.
@@ -97,14 +95,14 @@ parameter input.
 return vectorExclude(up:vector, input).}
 
 function hv { 
-    until ship:groundspeed <=3 {
+    until ship:groundspeed <=2.5 {
         local lOS is landingsite:position - ship:position. //line of sight to target landing
         local velocityDelta is vectorInclude(excludeUp(lOS), ship:velocity:surface) - excludeUp(lOS):normalized*ln(excludeUp(lOS):mag/1000+1)*120. //non linear desired velocity to avoid tipping over at large distances
         local normalVelocity is excludeUP(vectorExclude(excludeUp(lOS), ship:facing:vector)).
         local gravity is (constant():g*body:mass)/(body:radius^2).
-        set desSteer to lookdirup(up:vector * gravity - 0.3*velocityDelta - 0.3*normalVelocity ,ship:facing:topvector). //move towards desired location at velocityDelta speed, kill any normal Velocity.
-        mechazilla().
+        set desSteer to lookdirup(up:vector * gravity - 0.2*velocityDelta - 0.2*normalVelocity ,ship:facing:topvector). //move towards desired location at velocityDelta speed, kill any normal Velocity.
         lock steering to desSteer.
+        mechazilla().
         }
     lock steering to lookDirUp(up:forevector,ship:facing:topvector).
     mechazilla().
@@ -120,14 +118,21 @@ function mechazilla {
     
 }
 
-lock steering to getSteering(). // steering to the landing site
 toggle ag3.// toggle gridfins 30°
-wait until alt:radar <=1800.
+lock steering to getSteering().
+wait until alt:radar <=1000.
 land(). // Steer toward landingsite
 vs(450). // Pid landing throttle
-wait until ship:verticalspeed >=-80. 
+wait until ship:verticalspeed >=-100. 
 toggle ag1. // Three engines
-lock throttle to min(thr,0.4). // throttle to reach vi(line 5)
-ag2 on.
-hv().// kill horizontal velocity gained from land().
+lock throttle to thr. // throttle to reach vi(line 5)
+toggle ag2.
+hv().
+wait until alt:radar<=180.
+lock vi to -15.
+lock throttle to thr.
+wait until ship:groundspeed <1.
+toggle ag10.
+wait until ship:verticalspeed>-5.
+toggle ag8.
 wait until ship:oxidizer and ship:liquidfuel <=0.// catched booster continue thrusting until fuel is empty.
