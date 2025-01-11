@@ -1,3 +1,5 @@
+clearscreen.
+print "Waiting for Booster Signal acquisition".
 Signal().
 function Signal {
   until false {
@@ -8,11 +10,11 @@ function Signal {
 }
 
 function arms {
- until vessel("Heavy Booster"):altitude <=230 {
+ until vessel("Heavy Booster"):altitude <=200 {
    angle().
-   print vessel("Heavy Booster"):altitude.
  }
  ag1 on.
+ stlz().
 }
 
 function angle {  // Target angle
@@ -25,8 +27,9 @@ function angle {  // Target angle
   MZANG:setfield("target angle",ang).
 }
 
-function stlz { // Landing rails, pushers and extension setup for rapid reuse WIP
-when ship:verticalspeed >=-5 then { toggle ag3.}
-
-
+function stlz {
+  set MZANG to Mechazilla:getmodule("ModuleSLEController").
+  MZANG:setfield("target angle",ang).
+  ag3 on.
+  ag1 on.
 }
