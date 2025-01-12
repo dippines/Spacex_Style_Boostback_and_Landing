@@ -1,4 +1,6 @@
-ld().// load distance
+set STEERINGMANAGER:MAXSTOPPINGTIME to 15.
+set STEERINGMANAGER:PITCHPID:KD to 1.
+set STEERINGMANAGER:YAWPID:KD to 1.
 set k to 1. // error scaling
 lock m to ship:mass. // mass
 lock g to constant:g* body:mass / body:radius^2. // gravity
@@ -15,16 +17,17 @@ if hastarget {set landingsite to latlng(target:geoposition:lat, target:geopositi
 function errorVector {
     return getImpact():position - landingsite:position.}
 function defAOA {
-    local vspeed is ship:verticalspeed. // vertical speed
-    local gspeed is ship:groundspeed. // ground speed
-    local h is (alt:radar/apoapsis). // altitude ratio you might change apoapsis to the max alt that your ship had reach.
-    local t is (1-alt:radar/140000). // atmosphere something
-    local vm is vspeed/1500. // speed/maxspeed
+   local vspeed is ship:verticalspeed. // vertical speed
+   local gspeed is ship:groundspeed. // ground speed
+   local h is (alt:radar/apoapsis). // altitude ratio you might change apoapsis to the max alt that your ship had reach.
+   local t is (1-alt:radar/140000). // atmosphere something
+   local vm is vspeed/1500. // speed/maxspeed
     if throttle >0 {
         lock aoa to -1*(arctan(abs(vspeed/gspeed))*t*abs(vm)*h).
-    } 
-    else {lock aoa to (arctan(abs(vspeed/gspeed))*t*abs(vm)*h). 
-    }
+   } 
+    else {
+        lock aoa to (arctan(abs(vspeed/gspeed))*t*abs(vm)*h). 
+   }
     return aoa.
     
 }
@@ -36,12 +39,12 @@ function getSteering { // main steering function
     local result is velVector + correctionVector.
     local aoa is defAOA(). 
     if vang(result, velVector) > aoa {
-        set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
-    }
-    return lookdirup(result, facing:topvector).
+        set result to velVector:normalized + tan(aoa) * correctionVector:normalized. }
+    lock lkdp to lookdirup(result, facing:topvector).
+    lock rf to R(lkdp:pitch,lkdp:yaw, -90).
+    return rf.
     
 }
-
 function vs {
     Declare parameter desiredAltitude.
 Set integral to 0.
@@ -83,7 +86,9 @@ function land{
     set steeringStrength to 0.003.
     set steeringVector to ship:up:vector + steeringStrength * toTargetVector.
     set steeringVectorDir to steeringVector:direction.
+
     lock steering to R(steeringVectorDir:pitch, steeringVectorDir:yaw, -90).}
+    
 
 function vectorInclude {
 parameter included.
@@ -95,8 +100,8 @@ parameter input.
 return vectorExclude(up:vector, input).}
 
 function hv { 
-    until ship:groundspeed <=2.5 {
-        local lOS is landingsite:position - ship:position. //line of sight to target landing
+        until ship:groundspeed <=4 {
+        local lOS is landingsite:position - ship:position.
         local velocityDelta is vectorInclude(excludeUp(lOS), ship:velocity:surface) - excludeUp(lOS):normalized*ln(excludeUp(lOS):mag/1000+1)*120. //non linear desired velocity to avoid tipping over at large distances
         local normalVelocity is excludeUP(vectorExclude(excludeUp(lOS), ship:facing:vector)).
         local gravity is (constant():g*body:mass)/(body:radius^2).
@@ -117,18 +122,19 @@ function mechazilla {
     }
     
 }
-
+lock steering to heading (landingsite:heading,20).
+wait until alt:radar <=50000.
 toggle ag3.// toggle gridfins 30°
 lock steering to getSteering().
 wait until alt:radar <=1000.
 land(). // Steer toward landingsite
-vs(450). // Pid landing throttle
+vs(500). // Pid landing throttle parameter is desired landing heigh i think
 wait until ship:verticalspeed >=-100. 
 toggle ag1. // Three engines
 lock throttle to thr. // throttle to reach vi(line 5)
 toggle ag2.
 hv().
-wait until alt:radar<=180.
+wait until alt:radar<=210.
 lock vi to -15.
 lock throttle to thr.
 wait until ship:groundspeed <1.
