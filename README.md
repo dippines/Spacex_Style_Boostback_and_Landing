@@ -9,9 +9,10 @@ if you want to modify it you can credit me but i dont care as the code is not th
 Dependencies : - Starship Launch Expansion (OLT, Mechazilla..)
                - Starship Expansion Project (Starship, Superheavy...)
                - Trajectories (Predict impact position,very useful)
-               - Probably RSS 
+               - Probably RSS (Reborn)
 
 
 Optional : - Starship Ground Expansion (Boca chica decal, LC39A Starship installation etc)
            - Fuel Vent
            - Vent Mod 
+           - RSS (Reborn + MTE v2)
