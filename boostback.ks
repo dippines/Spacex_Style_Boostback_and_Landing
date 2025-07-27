@@ -38,93 +38,61 @@ when alt:radar >=69500 then {
   lock steering to srfprograde.
   lock throttle to 0.5.
 }
-wait until alt:radar>=70000.
-stage.
-wait until ship:apoapsis.
 
-RCS on.
-if ADDONS:TR:AVAILABLE {
-    			if ADDONS:TR:HASIMPACT {
-       			 PRINT ADDONS:TR:IMPACTPOS.
-    			} else {
-       			 PRINT "Impact position is not available".
-   			 }
-			} else {
-   			 PRINT "Trajectories is not available.".
-			}
+//--Functions----------------------------------------------------------------|
 
-when throttle >= 0 then {
-      set STEERINGMANAGER:MAXSTOPPINGTIME to 30.
-      set STEERINGMANAGER:PITCHPID:KD to 0.5.
-      set STEERINGMANAGER:YAWPID:KD to 0.5.
-	  
-preserve.
+//--GetImpact--------------------------------------------|
+function getImpact {
+    if addons:tr:hasimpact { 
+    return addons:tr:impactpos. 
+    }
+return ship:geoposition.
 }
 
-RCS ON.
-if hastarget {set landingpad to latlng(target:geoposition:lat, target:geoposition:lng).}     
-    else {set landingpad to latlng(28.6370253021226,-80.6014334665529). }
-set lngoff to (landingpad:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472. // longitude offset in meter 
-set latoff to (landingpad:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472. // latitude offset in meter
-lock steering to lookDirUp(up:forevector,ship:facing:topvector).     //all this is used to get around the problem of kOS' slow and inefficient steering problem
-lock throttle to  0.05.
-lock steering to heading (landingpad:heading, 0).
-RCS on.
-wait until vAng(ship:facing:forevector, srfRetrograde:vector)<=10.
-toggle ag5. // switch to 13 engines
-lock throttle to 1. 
-wait 10. // wait for the booster to have rotated change it to your needs
-
-when ship:liquidfuel >=10000 then {
-	toggle ag8.}
-when ship:liquidfuel <=10000 then {toggle ag9.}
-
-when lngoff >-1000 then {
-toggle ag1.
-lock throttle to 0.4.
+//--Target-------------------------------------------------------------------|
+if hastarget { 
+    set landingsite to latlng(target:geoposition:lat, target:geoposition:lng).
+} else {
+    set landingsite to latlng(28.6370253021226,-80.6014334665529).
 }
 
-when lngoff >-500 then {
-lock throttle to 0.1.
+//--Error vector---------------------------------------|
+function errorVector {   
+    return  landingsite:position - getImpact():position.
 }
 
-when lngoff >-5000 then {
-	lock throttle to 0.5.}.
+//--------------------------------------------------------------------------------------------------------BOOSTBACK-----------------------------------------------------------------------------------------------------//
 
-when altitude > 4000 then {
-		set lngoff to (landingpad:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472. 
-		set latoff to (landingpad:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472.
-		print "lngoff: " + lngoff.
-		print "latoff: " + latoff.
-		wait 0.1.
-		preserve.
-		}
+//--Variables-----------------------------------------------------------|
+set meco to 70000. // Boostback start altitude / separation.
+set maxalt to 100000. //max alt you want the apoapsis of the boostback to go to
+wait until alt:radar >= meco.
+set t1 to landingsite:position - getImpact():position. // Throttle margin
 
-				
-when lngoff >= -1.5 then {
-		lock throttle to 0.
-		toggle ag5.
-		toggle ag10. 
-        unlock steering.
-	set STEERINGMANAGER:MAXSTOPPINGTIME to 15.
-	set STEERINGMANAGER:PITCHPID:KD to 1.
-	set STEERINGMANAGER:YAWPID:KD to 1.
-        run land.
-		}
+// longitude and latitude offset in meters----------------------|
+lock lngoff to (landingsite:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472.
+lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472.
 
-When throttle > 0 then { 
+until abs(lngoff) < 10 and abs(latoff) < 5 or ABORT {  // Finish when errorvector is the lowest possible (try your own values), or when abort
 
-when latoff < -20 then {
-lock steering to heading (landingpad:Heading - 2,0).
-preserve.
+lock corr to VXCL(ship:sensors:grav,landingsite:position-ship:position). // straight vec from you to landingpos, on the same plan as errorvec.
+lock ang to VANG(corr, errorVector()).// Angle between the latest vec and errorvec, you want this to be = 0
+
+//--Tilt-------------|
+if apoapsis > maxalt {
+    lock tang to -7.5.
+} else {
+    lock tang to 7.5.
 }
 
-when latoff > 20 then {
+//--Steering -------------------------------------------|
+lock steering to heading (landingsite:heading-ang, tang). // Head toward landingpad without ang, to have an angle error = 0 (going straight toward landingpad)
 
-lock steering to heading (landingpad:heading + 2, 0).
-preserve.
-}
+//--Throttl-------------------------|
+lock bbt to errorVector():mag/t1:mag. // Ratio between the distance you are from the landingpad, divided by that same distance when the boostback code started. Don't worry if it seems you don't push near the end.  
+lock throttle to abs(min(max(bbt,0.05),1)).
+
+wait 0.1.
 }
 
-wait until lngoff >=-1.5.
-run land.
+lock throttle to 0.
