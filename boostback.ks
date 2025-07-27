@@ -88,10 +88,10 @@ if apoapsis > maxalt {
 //--Steering -------------------------------------------|
 lock steering to heading (landingsite:heading-ang, tang). // Head toward landingpad without ang, to have an angle error = 0 (going straight toward landingpad)
 
-//--Throttl-------------------------|
+//--Throttle------------------------------|
 lock bbt to errorVector():mag/t1:mag. // Ratio between the distance you are from the landingpad, divided by that same distance when the boostback code started. Don't worry if it seems you don't push near the end.  
 lock throttle to abs(min(max(bbt,0.05),1)).
-
+print "throttle value" + throttle.
 wait 0.1.
 }
 
