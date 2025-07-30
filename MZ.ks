@@ -32,4 +32,4 @@ function angle {  // Target angle
   MZANG:setfield("target angle",ang).
 }
 
-//SET anArrow TO VECDRAW(V(0,0,0),V(a,b,c),RGB(1,0,0),"See the arrow?",1.0,TRUE,0.2,TRUE,TRUE).
+//This code works perfectly but I need to update it because there are too many loops. 
