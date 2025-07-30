@@ -1,30 +1,4 @@
-function ld {// load distances( visible tower and ship from 500km, camera feed etc)
-SET kuniverse:defaultloaddistance:flying:LOAD TO 500000.   
-SET kuniverse:defaultloaddistance:flying:UNLOAD TO 500000. 
-SET kuniverse:defaultloaddistance:flying:UNPACK TO 500000. 
-SET kuniverse:defaultloaddistance:flying:PACK TO 500000.   
-SET kuniverse:defaultloaddistance:escaping:LOAD TO 500000.   
-SET kuniverse:defaultloaddistance:escaping:UNLOAD TO 500000. 
-SET kuniverse:defaultloaddistance:escaping:UNPACK TO 500000. 
-SET kuniverse:defaultloaddistance:escaping:PACK TO 500000.   
-SET kuniverse:defaultloaddistance:SUBORBITAL:LOAD TO 500000.   
-SET kuniverse:defaultloaddistance:SUBORBITAL:UNLOAD TO 500000. 
-SET kuniverse:defaultloaddistance:SUBORBITAL:UNPACK TO 500000. 
-SET kuniverse:defaultloaddistance:SUBORBITAL:PACK TO 500000.   
-SET kuniverse:defaultloaddistance:ORBIT:LOAD TO 500000.   
-SET kuniverse:defaultloaddistance:ORBIT:UNLOAD TO 500000. 
-SET kuniverse:defaultloaddistance:ORBIT:UNPACK TO 500000. 
-SET kuniverse:defaultloaddistance:ORBIT:PACK TO 500000.   
-SET kuniverse:defaultloaddistance:prelaunch:LOAD TO 500000.   
-SET kuniverse:defaultloaddistance:prelaunch:UNLOAD TO 500000. 
-SET kuniverse:defaultloaddistance:prelaunch:UNPACK TO 500000. 
-SET kuniverse:defaultloaddistance:prelaunch:PACK TO 500000.   
-SET kuniverse:defaultloaddistance:landed:LOAD TO 500000.   
-SET kuniverse:defaultloaddistance:landed:UNLOAD TO 500000. 
-SET kuniverse:defaultloaddistance:landed:UNPACK TO 500000. 
-SET kuniverse:defaultloaddistance:landed:PACK TO 500000.   
-}
-ld().
+
 Clearscreen.
 //--Functions----------------------------------------------------------------|
 
