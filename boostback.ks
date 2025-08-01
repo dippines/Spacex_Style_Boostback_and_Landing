@@ -1,5 +1,3 @@
-
-Clearscreen.
 //--Functions----------------------------------------------------------------|
 
 //--GetImpact--------------------------------------------|
@@ -25,7 +23,7 @@ function errorVector {
 //----------------------------------------------------------------------------------BOOSTBACK-------------------------------------------------------------------------------//
 
 //--Variables-----------------------------------------------------------|
-set meco to 40000. // Boostback start altitude.
+set meco to 70000. // Boostback start altitude.
 
 set maxalt to 100000. //max alt you want the apoapsis of the boostback to go to : W.I.P.
 
@@ -43,26 +41,25 @@ until abs(lngoff) < 5 and abs(latoff) < 5 or ABORT {
     lock ang to VANG(corr, errorVector()).// Angle between the latest vec and errorvec, you want this to be = 0
     
     //--Tilt-------------|
-    if apoapsis > maxalt {
-    lock tilt to -5.
-    } else {                // W.I.P.
-        lock tilt to 5.
-    }
+    lock pr to t1:mag/maxalt.
 
     //--Steering -------------------------------------------|
     
     if launchpos:lat - landingsite:lat >0 {
-        lock steering to heading (landingsite:heading+ang, tilt).
-    } else {
-        lock steering to heading (landingsite:heading-ang, tilt).
+        lock steering to heading (landingsite:heading+ang, 0).
+    } else if launchpos:lat - landingsite:lat <0{
+        lock steering to heading (landingsite:heading-ang, 0).
+    } else if launchpos:lat - landingsite:lat =0 {
+        lock steering to heading (landingsite:heading,0).
     }
         
     //--Throttle------------------------------|
-    lock bbt to errorVector():mag/t1:mag. // Ratio between the distance you are from the landingpad, divided by that same distance when the boostback code started. Don't worry if it seems you don't push near the end.  
-    lock throttle to abs(min(max(bbt,0.05),1)).
+    
+    lock bbt to errorVector():mag/t1:mag.
+    lock throttle to abs(min(max(bbt,0.1),1))*pr.
     
 wait 0.1.
 
 }
-unlock throttle.
 lock throttle to 0.
+unlock throttle.
