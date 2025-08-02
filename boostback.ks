@@ -23,7 +23,7 @@ function errorVector {
 //----------------------------------------------------------------------------------BOOSTBACK-------------------------------------------------------------------------------//
 
 //--Variables-----------------------------------------------------------|
-set meco to 70000. // Boostback start altitude.
+set meco to 75000. // Boostback start altitude.
 
 set maxalt to 100000. //max alt you want the apoapsis of the boostback to go to : W.I.P.
 
@@ -35,22 +35,27 @@ set t1 to landingsite:position - getImpact():position.
 // longitude and latitude offset in meters----------------------|
 lock lngoff to (landingsite:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472.
 lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472.
-until abs(lngoff) < 5 and abs(latoff) < 5 or ABORT {
+until lngoff > 20 and abs(latoff) < 4 or ABORT {
     
     lock corr to VXCL(ship:sensors:grav,landingsite:position-ship:position). // straight vec from you to landingpos, on the same plan as errorvec.
     lock ang to VANG(corr, errorVector()).// Angle between the latest vec and errorvec, you want this to be = 0
     
     //--Tilt-------------|
     lock pr to t1:mag/maxalt.
+    if apoapsis>=maxalt {
+        lock tilt to -5.
+    } else {
+        lock tilt to 5.
+    }
 
     //--Steering -------------------------------------------|
     
     if launchpos:lat - landingsite:lat >0 {
-        lock steering to heading (landingsite:heading+ang, 0).
+        lock steering to heading (landingsite:heading+ang, tilt).
     } else if launchpos:lat - landingsite:lat <0{
-        lock steering to heading (landingsite:heading-ang, 0).
+        lock steering to heading (landingsite:heading-ang, tilt).
     } else if launchpos:lat - landingsite:lat =0 {
-        lock steering to heading (landingsite:heading,0).
+        lock steering to heading (landingsite:heading, tilt).
     }
         
     //--Throttle------------------------------|
@@ -61,5 +66,8 @@ until abs(lngoff) < 5 and abs(latoff) < 5 or ABORT {
 wait 0.1.
 
 }
+
 lock throttle to 0.
 unlock throttle.
+
+// run land.
