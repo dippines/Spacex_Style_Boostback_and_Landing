@@ -1,44 +1,62 @@
-set landingsite to latlng(28.478863,-80.528986).
+//--Variables-------------------------------------------------------------------------|
 
-
-until false {
-  function getImpact {
-    if addons:tr:hasimpact { return addons:tr:impactpos. 
-  }
-  return ship:geoposition.
+//--Target-------------------------------------------------------------------|
+if hastarget { 
+    set landingsite to latlng(target:geoposition:lat, target:geoposition:lng).
+} else {
+    set landingsite to latlng(28.478863,-80.528986).
 }
+
+//--Throttle--------------------------------------------------------|
+
+lock g to constant:g * body:mass / body:radius^2.					
+lock maxDecel to (ship:availablethrust / ship:mass) - g.			
+lock stopDist to ship:velocity:surface:sqrmagnitude / (2 * maxDecel).
+lock idealThrottle to stopDist / impactDist.						
+
+//--Impact-Distance-----------------------------------|
+if addons:tr:available and addons:tr:hasimpact
+{	lock impactDist to addons:tr:impactpos:distance+100.}
+
+
+
+//--Functions----------------------------------------------------------------|
+
+//--Error vector---------------------------------------|
 function errorVector {   
     return  landingsite:position - getImpact():position.
 }
 
-lock lngoff to (landingsite:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472.
-lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472.
-print "lngoff .......... :" + lngoff.
-print "latoff .......... :" + lngoff.
-
-lock g to constant:g * body:mass / body:radius^2.
-lock maxDecel to (ship:availablethrust / ship:mass) - g.
-lock stopDist to (ship:verticalspeed^2 / (2 * maxDecel)) * 2.
-local acc to ship:availablethrust/ship:mass.
-lock idealThrust to acc/(ship:availablethrust/ship:mass).
-
-if alt:radar<=stopDist and alt:radar <=10000  {
-
-if abs(lngoff) or abs(latoff) <= 10 {
-  lock steering to -ship:velocity:surface.
-  lock throttle to idealThrust.
-} else {
-  global horizontal_factor is 0.1.
-  lock verticalVelocity to ship:up:vector * ship:verticalSpeed. // upwards vertical speed
-  lock steering to (- verticalVelocity - horizontal_factor*(ship:velocity:surface-verticalVelocity)):direction. //lock against velocity with a bias to horizontal
-  lock throttle to idealThrust.
-  
+//--GetImpact--------------------------------------------|
+function getImpact {
+    if addons:tr:hasimpact { 
+    return addons:tr:impactpos. 
+    }
+return ship:geoposition.
 }
+
+//----------------------------------------------------------------------------------LANDING-------------------------------------------------------------------------------//
+
+//--Steering-------------------------------------------------------|
+lock ev to errorVector(). // Error Vector
+lock rv to srfRetrograde:vector. // Retrograde vector
+lock an to VANG(ev,rv). // Angle between error and retrograde vectors
+lock stone to heading(landingsite:heading,srfRetrograde:vector:mag+an). // Head toward landingsite, with the retrograde inclination +the "error angle"
+lock finaoa to -5. // AoA when th
+lock stwo to -ship:velocity:surface:normalized + tan(finaoa) * ev():normalized
+//--Main-Loop-----------------------------------------------------------------|
+
+until false {
+if alt:radar <=stopDist and alt:radar <=5000  {
+
+lock steering to stwo.
+lock throttle to idealThrottle.
 
 } 
 else {
-  lock y to landingsite:position-ship:position.
-lock steering to 2*errorVector()+y.
-}
 
+lock steering to stone.
+
+}
+wait 0.1.
 }
