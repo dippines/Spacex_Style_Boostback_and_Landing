@@ -54,7 +54,7 @@ until lngoff > 20 and abs(latoff) < 4 or ABORT {
         lock steering to heading (landingsite:heading+ang, tilt).
     } else if launchpos:lat - landingsite:lat <0{
         lock steering to heading (landingsite:heading-ang, tilt).
-    } else if launchpos:lat - landingsite:lat =0 {
+    } else if launchpos:lat - landingsite:lat =0 {                // I didn't tested RTLS so it might not work in that case, if you find a way to make it work leave a comment
         lock steering to heading (landingsite:heading, tilt).
     }
         
@@ -71,3 +71,4 @@ lock throttle to 0.
 unlock throttle.
 
 // run land.
+
