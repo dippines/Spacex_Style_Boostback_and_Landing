@@ -27,7 +27,7 @@ SET kuniverse:defaultloaddistance:landed:PACK TO distance.
 }
 ld().
 
-// Load distance add-on, it can burn to hell and summon the kraken so use with precaution, 
+// Load distance add-on, it can burn to hell your pc and summon the kraken so use with precaution, 
 //don't push too far the limit 500km works good for me, if you want to run a starship orbit code while a superheavy + mechazilla landing one,
 //you want the distance to be the minimal distance between the pad and starship, else kOS couldn't control starship.
 // Idk if you must do it but I run it on every kOS computer like mechazilla, booster and starship. 
