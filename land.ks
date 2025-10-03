@@ -1,3 +1,8 @@
+// Still work in progress I'm pretty sure it could get you close to target but never pinpoint
+// Future updates : create a list that depending on the flight situation apply a certain value that changes the flight plan
+
+
+
 //--Variables-------------------------------------------------------------------------|
 
 //--Target-------------------------------------------------------------------|
@@ -61,3 +66,4 @@ lock steering to stone.
 }
 wait 0.1.
 }
+
