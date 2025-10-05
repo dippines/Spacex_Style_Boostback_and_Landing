@@ -11,6 +11,7 @@ Dependencies : - Starship Launch Expansion (OLT, Mechazilla)
                - Starship Expansion Project (Starship, Superheavy...)
                - Trajectories (Predict impact position,very useful)
                - Probably RSS Reborn, especially for boostback but values can be changed to fit if                  you play on kerbin or earth
+			   - kOS (Kerbal Operating System): run codes
 
 
 Optional : - Starship Ground Expansion (Boca chica decal, LC39A Starship installation etc)
