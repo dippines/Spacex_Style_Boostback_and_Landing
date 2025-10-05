@@ -7,14 +7,14 @@ Boostback code need to be launched before boostback start, or at launch
 ld code is a function that you can add to the codes if you want the loading distance of kOS to change, it helps have visible camera feed and objects at a wanted distance, thanks to it you can put starship in orbit, while superheavy lands.
 
 
-Dependencies : - Starship Launch Expansion (OLT, Mechazilla..)
+Dependencies : - Starship Launch Expansion (OLT, Mechazilla)
                - Starship Expansion Project (Starship, Superheavy...)
                - Trajectories (Predict impact position,very useful)
-               - Probably RSS (Reborn)
+               - Probably RSS Reborn, especially for boostback but values can be changed to fit if                  you play on kerbin or earth
 
 
 Optional : - Starship Ground Expansion (Boca chica decal, LC39A Starship installation etc)
            - Fuel Vent
            - Vent Mod 
            - RSS (Reborn + MTE v2)
-					 - OCISLY (HullCam preview)
+		   - OCISLY (HullCam preview)
