@@ -3,22 +3,15 @@
 - Final approach toward landingsite at the end in case it's not already on point : 11/2025
 - Better aoa calculation depending on horizontalerror rather than an if else : 10/2025
 
-
-
-// FOR ALL READERS : 
-For now this code won't get you pinpoint but i'd say in a ~50m radius. The code works this way: It points retrograde, when at 50km, it will steer to the getsteering function,
-what you need to know about this function is it either "go toward" or "brakes" depending on the value of the aoa, this value is set in the //--AoA--\\ part
-The aoa depends on various factors : The altitude (i function) and the angle linked to it by their index (//--Lists--\\).
-If the horizontalerror is "past" the impact position, it will brake (to visualise : it bring the trajectory toward the vessel(and so toward the landingsite))
-and if it's not past it will "go toward" this is decided according to the H1 value and the f list (-1 = brake, 1 = go toward).
-What you need to know if you want to change the maoa list: the more H1 is little, the more the values in that list should be little
+// What you need to know if you want to change the maoa list: the more H1 is little, the more the values in that list should be little, ask chatgpt this to know how to change them : 
+// "What would be in the case of a aerodynamic descent in the spacex style the (max value or the ) value of the angle between retrograde and the correction direction "
 
 //--Variables--\\
 
 //--Lists--\\
 set alts to list(50000,25000,13500,6750,3375).
-set maoa to list(40,15,10,5,2).
 set f to list(-1,1).
+set maoa to list(2,5,8,5,2).
 
 //--Target--\\
 if hastarget { 
@@ -72,7 +65,7 @@ function fdynaoax {
     local H1 is errorVector:mag.
     lock rx to i().
     if alts[rx] <= alt:radar {
-        if H1 < 150 {
+        if H1 < 50 {
             if throttle > 0 {
                 set fx to f[0].
             } else {
@@ -118,7 +111,7 @@ RCS ON.
 wait until alt:radar <=50000.
 lock steering to getsteering().
 wait until alt:radar <=5000.
-wait until alt:radar <= stopDist+500.
+wait until alt:radar <= stopDist+(alt:radar-altitude).
 lock throttle to idealThrottle.
 wait until false.
 
