@@ -1,7 +1,7 @@
 // THINGS TO DO & TO COME : 
 - Automatic & precise throttle : 10/2025
 - Final approach toward landingsite at the end in case it's not already on point : 11/2025
-- Better aoa calculation depending on horizontalerror rather than an if else
+- Better aoa calculation depending on horizontalerror rather than an if else : 10/2025
 
 //--Variables--\\
 
@@ -111,6 +111,7 @@ wait until alt:radar <=5000.
 wait until alt:radar <= stopDist+500.
 lock throttle to idealThrottle.
 wait until false.
+
 
 
 
