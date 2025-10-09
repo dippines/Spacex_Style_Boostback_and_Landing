@@ -1,6 +1,11 @@
+// THINGS TO DO & TO COME : 
+- Automatic & precise throttle : 10/2025
+- Final approach toward landingsite at the end in case it's not already on point : 11/2025
+
+
 //--Variables--\\
 
-//--Paliers--\\
+//--ALTS--\\
 set alts to list(50000,25000,13500,6750,3375).
 
 //--Target--\\
@@ -57,7 +62,7 @@ function fdynaoax {
     set maoa to list(40,20,15,10,5).
     lock rx to i().
     if alts[rx] <= alt:radar {
-        if horizontalError < 300 {
+        if horizontalError < 100 {
             if throttle > 0 {
                 set fx to f[0].
                 print(1).
@@ -104,4 +109,5 @@ until false {
     lock steering to getsteering().
 wait 0.1.
 }
+
 
