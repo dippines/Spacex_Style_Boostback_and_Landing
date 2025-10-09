@@ -6,16 +6,19 @@ MZ code is the mechazilla one, need to be launched on the tower computer.
 Boostback code need to be launched before boostback start, or at launch
 ld code is a function that you can add to the codes if you want the loading distance of kOS to change, it helps have visible camera feed and objects at a wanted distance, thanks to it you can put starship in orbit, while superheavy lands.
 
+MZ code : 95%
+Boostback : 80%
+Landing : 35%
 
-Dependencies : - Starship Launch Expansion (OLT, Mechazilla)
-               - Starship Expansion Project (Starship, Superheavy...)
-               - Trajectories (Predict impact position,very useful)
-               - Probably RSS Reborn, especially for boostback but values can be changed to fit if                  you play on kerbin or earth
+
+Dependencies : - Starship Launch Expansion 
+			   - Starship Expansion Project 
+               - Trajectories
 			   - kOS (Kerbal Operating System): run codes
 
 
-Optional : - Starship Ground Expansion (Boca chica decal, LC39A Starship installation etc)
+Optional : - Starship Ground Expansion
            - Fuel Vent
            - Vent Mod 
-           - RSS (Reborn + MTE v2)
-		   - OCISLY (HullCam preview)
+           - RSS
+		   - OCISLY (cam previews)
