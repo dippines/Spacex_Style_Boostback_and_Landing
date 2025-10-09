@@ -1,6 +1,6 @@
 //--Variables--\\
 
-//--ALTS--\\
+//--Paliers--\\
 set alts to list(50000,25000,13500,6750,3375).
 
 //--Target--\\
@@ -57,7 +57,7 @@ function fdynaoax {
     set maoa to list(40,20,15,10,5).
     lock rx to i().
     if alts[rx] <= alt:radar {
-        if horizontalError < 100 {
+        if horizontalError < 300 {
             if throttle > 0 {
                 set fx to f[0].
                 print(1).
