@@ -5,8 +5,10 @@
 
 //--Variables--\\
 
-//--ALTS--\\
+//--Lists--\\
 set alts to list(50000,25000,13500,6750,3375).
+set f to list(-1,1).
+set maoa to list(40,20,15,5,2).
 
 //--Target--\\
 if hastarget { 
@@ -15,17 +17,17 @@ if hastarget {
     set landingsite to latlng(28.478863,-80.528986).
 }
 
-////--Impact-Distance--\\
-//if addons:tr:available and addons:tr:hasimpact
-//{lock impactDist to addons:tr:impactpos:distance+100.}
-//
-//
-////--Throttle--\\
-//
-//lock g to constant:g * body:mass / body:radius^2.					
-//lock maxDecel to (ship:availablethrust / ship:mass) - g.			
-//lock stopDist to ship:velocity:surface:sqrmagnitude / (2 * maxDecel).
-//lock idealThrottle to stopDist / impactDist.
+//--Impact-Distance--\\
+if addons:tr:available and addons:tr:hasimpact
+{lock impactDist to addons:tr:impactpos:distance+100.}
+
+
+//--Throttle--\\
+
+lock g to constant:g * body:mass / body:radius^2.					
+lock maxDecel to (ship:availablethrust / ship:mass) - g.			
+lock stopDist to ship:velocity:surface:sqrmagnitude / (2 * maxDecel).
+lock idealThrottle to stopDist / impactDist.
 
 
 //--Functions--\
@@ -57,22 +59,17 @@ function i {
 
 function fdynaoax {
     local errorVector is getimpact():position - landingsite:position.
-    local horizontalError is errorVector:mag.
-    set f to list(-1,1).
-    set maoa to list(40,20,15,10,5).
+    local H1 is errorVector:mag.
     lock rx to i().
     if alts[rx] <= alt:radar {
-        if horizontalError < 300 { //Don't go very low, 300 is good, for safety I would put it around 400 (until update)
+        if H1 < 150 {
             if throttle > 0 {
                 set fx to f[0].
-                print(1).
             } else {
                 set fx to f[1].
-                print(-1).
             }
         } else {
             set fx to f[0].
-            print(1).
         }
 
         if rx <=3 {
@@ -80,7 +77,8 @@ function fdynaoax {
         } else {
             set maxaoa to maoa[rx]*f[1].
         }
-        set dynaoa to min(horizontalError, maxaoa).
+        set dynaoa to maxaoa.
+        print(fx).
         return dynaoa.
     }
 }
@@ -103,12 +101,17 @@ function getSteering {
 
 //----------------------------------------------------------------------------------LANDING-------------------------------------------------------------------------------\\
 
-//--Main-Loop--\\
+lock steering to srfRetrograde.
+Brakes on.
+SAS OFF.
+RCS ON.
+wait until alt:radar <=50000.
+lock steering to getsteering().
+wait until alt:radar <=5000.
+wait until alt:radar <= stopDist+500.
+lock throttle to idealThrottle.
+wait until false.
 
-until false {
-    lock steering to getsteering().
-wait 0.1.
-}
 
 
 
