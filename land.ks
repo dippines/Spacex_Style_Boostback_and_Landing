@@ -1,6 +1,6 @@
 //--Variables--\\
 
-//--Paliers--\\
+//--ALTS--\\
 set alts to list(50000,25000,13500,6750,3375).
 
 //--Target--\\
@@ -54,10 +54,9 @@ function fdynaoax {
     local errorVector is getimpact():position - landingsite:position.
     local horizontalError is errorVector:mag.
     set f to list(-1,1).
-    set maoa to list(50,40,25,15,5).
+    set maoa to list(40,20,15,10,5).
     lock rx to i().
     if alts[rx] <= alt:radar {
-        print("i"+"__"+i()).
         if horizontalError < 100 {
             if throttle > 0 {
                 set fx to f[0].
