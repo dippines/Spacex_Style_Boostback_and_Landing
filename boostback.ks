@@ -70,4 +70,6 @@ lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472.
     wait 0.1.}
 lock throttle to 0.
 unlock throttle.
+run land.
+
 
