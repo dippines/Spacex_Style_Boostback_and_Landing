@@ -1,8 +1,7 @@
 // THINGS TO DO & TO COME : 
 - Automatic & precise throttle : 10/2025
 - Final approach toward landingsite at the end in case it's not already on point : 11/2025
-- More automatic ( less constants and more variables)
-
+- Better aoa calculation depending on horizontalerror rather than an if else
 
 //--Variables--\\
 
@@ -63,7 +62,7 @@ function fdynaoax {
     set maoa to list(40,20,15,10,5).
     lock rx to i().
     if alts[rx] <= alt:radar {
-        if horizontalError < 100 {
+        if horizontalError < 300 { //Don't go very low, 300 is good, for safety I would put it around 400 (until update)
             if throttle > 0 {
                 set fx to f[0].
                 print(1).
@@ -110,6 +109,7 @@ until false {
     lock steering to getsteering().
 wait 0.1.
 }
+
 
 
 
