@@ -39,9 +39,7 @@ set t1 to landingsite:position - getImpact():position. // Landingsite - your imp
 lock lngoff to (landingsite:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472. 
 lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472. 
 
-__main__().
 
-function __main__{
     until lngoff > 20 and abs(latoff) < 4 or ABORT {
 
         lock corr to VXCL(ship:sensors:grav,landingsite:position-ship:position). // straight vec from you to landingpos, on the same plan as errorvec.
@@ -72,4 +70,3 @@ function __main__{
     wait 0.1.}
 lock throttle to 0.
 unlock throttle.
-}
