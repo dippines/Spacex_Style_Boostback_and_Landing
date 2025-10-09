@@ -1,6 +1,7 @@
 // THINGS TO DO & TO COME : 
 - Automatic & precise throttle : 10/2025
 - Final approach toward landingsite at the end in case it's not already on point : 11/2025
+- More automatic ( less constants and more variables)
 
 
 //--Variables--\\
@@ -109,5 +110,6 @@ until false {
     lock steering to getsteering().
 wait 0.1.
 }
+
 
 
