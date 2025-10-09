@@ -8,7 +8,7 @@ ld code is a function that you can add to the codes if you want the loading dist
 
 MZ code : 99%
 Boostback : 95%
-Landing : 60%
+Landing : 75%
 
 
 Dependencies : - Starship Launch Expansion 
