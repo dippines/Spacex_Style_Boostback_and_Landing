@@ -1,10 +1,4 @@
-// THINGS TO DO & TO COME : 
-- Automatic & precise throttle : 10/2025
-- Final approach toward landingsite at the end in case it's not already on point : 11/2025
-- Better aoa calculation depending on horizontalerror rather than an if else : 10/2025
-
-// What you need to know if you want to change the maoa list: the more H1 is little, the more the values in that list should be little, ask chatgpt this to know how to change them : 
-// "What would be in the case of a aerodynamic descent in the spacex style the (max value or the ) value of the angle between retrograde and the correction direction "
+// I'll detail each terms soon
 
 //------------------------Variables------------------------\\
 
@@ -115,3 +109,4 @@ wait until alt:radar <=10000.
 wait until alt:radar <= startalt().
 lock throttle to throt().
 wait until false.
+
