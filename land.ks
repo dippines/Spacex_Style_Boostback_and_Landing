@@ -6,41 +6,44 @@
 // What you need to know if you want to change the maoa list: the more H1 is little, the more the values in that list should be little, ask chatgpt this to know how to change them : 
 // "What would be in the case of a aerodynamic descent in the spacex style the (max value or the ) value of the angle between retrograde and the correction direction "
 
-//--Variables--\\
+//------------------------Variables------------------------\\
 
-//--Lists--\\
-set alts to list(50000,25000,13500,6750,3375).
+//------------Lists------------\\
+set alts to list(50000,25000,13500,5000,20).
 set f to list(-1,1).
-set maoa to list(2,5,8,5,2).
+set maoa to list(2,4,4,2,1).
 
-//--Target--\\
+//------------Target------------\\
 if hastarget { 
     set landingsite to latlng(target:geoposition:lat, target:geoposition:lng).
 } else {
     set landingsite to latlng(28.478863,-80.528986).
 }
 
-//--Impact-Distance--\\
-if addons:tr:available and addons:tr:hasimpact
-{lock impactDist to addons:tr:impactpos:distance+100.}
 
 
-//--Throttle--\\
+//------------------------Functions------------------------\\
 
-lock g to constant:g * body:mass / body:radius^2.					
-lock maxDecel to (ship:availablethrust / ship:mass) - g.			
-lock stopDist to ship:velocity:surface:sqrmagnitude / (2 * maxDecel).
-lock idealThrottle to stopDist / impactDist.
-
-
-//--Functions--\
-
-//--Error vector--\\
+//------------Throttle------------\\
+function startalt {
+    lock v1 to -ship:verticalspeed.
+    lock Fr to ship:maxthrust.
+    lock M to ship:mass.
+    lock g to constant:g * body:mass / body:radius^2.
+    lock n to 1. // Throttle
+    lock h to (v1^2)/(2*(n*Fr/M-g)).
+    return h.
+}
+function throt {
+    lock n2 to (0.5*v1+g*h)/(Fr/M)*h.
+    return n2.
+}
+//------------Error vector------------\\
 function errorVector {   
     return  landingsite:position - getImpact():position.
 }
 
-//--GetImpact--\\
+//------------GetImpact------------\\
 function getImpact {
     if addons:tr:hasimpact { 
     return addons:tr:impactpos. 
@@ -48,11 +51,14 @@ function getImpact {
 return ship:geoposition.
 }
 
-//--AoA--\\
+//------------AoA------------\\
 function i {
-
-    if alt:radar > alts[0] { return 0. }
-    if alt:radar <= alts[alts:length - 1] { return 4. } 
+    if alt:radar > alts[0] {
+        return 0.
+    }
+    if alt:radar <= alts[alts:length - 1] {
+        return 4.
+    } 
     for idx in range(0, alts:length - 1) {
         if alt:radar <= alts[idx] and alt:radar > alts[idx+1] {
             return idx + 1.
@@ -65,31 +71,25 @@ function fdynaoax {
     local H1 is errorVector:mag.
     lock rx to i().
     if alts[rx] <= alt:radar {
-        if H1 < 50 {
+        if H1 < 20 {
             if throttle > 0 {
-                set fx to f[0].
+                set maoa[4] to vang(-ship:velocity:surface, ship:up:vector).
+                set fx to 2*f[1].
             } else {
-                set fx to f[1].
+            set fx to f[1].
             }
         } else {
-            set fx to f[0].
+        set fx to f[0].
         }
-
-        if rx <=3 {
-            set maxaoa to maoa[rx]*fx.
-        } else {
-            set maxaoa to maoa[rx]*f[1].
-        }
-        set dynaoa to maxaoa.
-        print(fx).
-        return dynaoa.
+        set maxaoa to maoa[rx]*fx.
+        return maxaoa.
     }
 }
 
-//--Steering--\\
+//------------Steering------------\\
 
 function getSteering {
-
+    
     local velVector is -ship:velocity:surface.
     local correctionVector to errorVector() * 1.
     local result is velVector + correctionVector.
@@ -102,21 +102,16 @@ function getSteering {
     return lookdirup(result, facing:topvector).
 }
 
-//----------------------------------------------------------------------------------LANDING-------------------------------------------------------------------------------\\
+//------------------------LANDING------------------------\\
 
 lock steering to srfRetrograde.
 Brakes on.
 SAS OFF.
 RCS ON.
-wait until alt:radar <=50000.
+lock steering to srfRetrograde.
+wait until alt:radar <=80000.
 lock steering to getsteering().
-wait until alt:radar <=5000.
-wait until alt:radar <= stopDist+(alt:radar-altitude).
-lock throttle to idealThrottle.
+wait until alt:radar <=10000.
+wait until alt:radar <= startalt().
+lock throttle to throt().
 wait until false.
-
-
-
-
-
-
