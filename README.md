@@ -14,7 +14,7 @@ Landing : 75%
 Dependencies : - Starship Launch Expansion 
 			   - Starship Expansion Project 
                - Trajectories
-			   - kOS (Kerbal Operating System): run codes
+			   - kOS
 
 
 Optional : - Starship Ground Expansion
