@@ -33,7 +33,15 @@ function throt {
     lock n2 to (0.5*v1+g*50)/((Fr/M)*h).
     return n2.
 }
-
+function fnthrot {
+    
+lock gravityForce to ship:mass * g.
+set targetSpeed to -5.
+lock speedError to targetSpeed - ship:verticalspeed.
+lock throttleAdjustment to (speedError * ship:mass) / (ship:availablethrust + gravityForce).
+lock ApproachThrottle to throttleAdjustment.
+return ApproachThrottle.
+}
 
 
 //------------Error vector------------\\
@@ -70,7 +78,7 @@ function fdynaoax {
     local H1 is errorVector:mag.
     lock rx to i().
     if alts[rx] <= alt:radar {
-        if H1 < 40 {
+        if H1 < 30 {
             if throttle > 0 {
                 set maoa[4] to vang(-ship:velocity:surface, ship:up:vector).
                 set fx to f[0].
@@ -92,7 +100,7 @@ function fdynaoax {
 
 function getSteering {
     local velVector is -ship:velocity:surface.
-    local correctionVector to errorVector() * 1.
+    local correctionVector to errorVector().
     local result is velVector + correctionVector.
     local aoa is fdynaoax(). 
 
@@ -100,7 +108,19 @@ function getSteering {
         set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
     }
     lock val to lookdirup(result, facing:topvector).
-    return R(val:pitch,val:yaw,45).
+    return val.
+}
+
+
+//------------Mechazilla------------\\
+function mechazilla {
+
+    SET MESSAGE TO "Connecting Mechazilla and booster".
+    SET C TO VESSEL("Mechazilla"):CONNECTION.
+    IF C:SENDMESSAGE(MESSAGE) {
+        PRINT "Catching".
+    }
+    
 }
 
 //------------------------LANDING------------------------\\
@@ -120,5 +140,6 @@ wait until alt:radar <= startalt().
 lock throttle to 0.7+throt().
 wait until alt:radar <= 200.
 lock steering to up.
-lock throttle to 0.1.
+GEAR on.
+lock throttle to fnthrot().
 wait until false.
