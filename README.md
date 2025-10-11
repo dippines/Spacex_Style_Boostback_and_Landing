@@ -1,5 +1,5 @@
-I highly recommend using Visual studio code to read the code, it's better to understand.
-You can credit me if you use the code but i don't really care.
+I highly recommend using Visual studio code for reading.
+You can credit me if you use the code but I don't really care.
 
 
 MZ code is the mechazilla one, need to be launched on the tower computer.
