@@ -5,11 +5,14 @@ You can credit me if you use the code but I don't really care.
 MZ code is the mechazilla one, need to be launched on the tower computer.
 Boostback code need to be launched before boostback start, or at launch
 ld code is a function that you can add to the codes if you want the loading distance of kOS to change, it helps have visible camera feed and objects at a wanted distance, thanks to it you can put starship in orbit, while superheavy lands.
-
-# MZ code : 99%
-# Boostback : 95%
-# Landing : 85%
-
+# Superheavy : 
+ MZ code : 99%
+ Boostback : 95%
+ Booster Landing : 85%
+# Starship :
+ Orbit : 0%
+ Landing : 0%
+ 
 
 Dependencies : - Starship Launch Expansion 
 			   - Starship Expansion Project 
