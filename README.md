@@ -1,3 +1,6 @@
+This code work for both Falcon 9 and Starship.
+
+
 I highly recommend using Visual studio code for reading.
 You can credit me if you use the code but I don't really care.
 
@@ -8,8 +11,8 @@ ld code is a function that you can add to the codes if you want the loading dist
 
 # Codes : 
  - Mechazilla : 99%
-# Booster :
-Landing : 80 %
+# Booster (Falcon 9 or SuperHeavy) :
+ - Landing : 80 %
  - Boostback : 95%
 # Starship :
  -Landing : 0%
