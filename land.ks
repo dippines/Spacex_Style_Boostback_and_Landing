@@ -1,6 +1,4 @@
-// I'll detail each terms soon
-
-// WORK IN PROGRESS IT'S NOT FINISHED
+// use at your own risk, I'll detail each terms soon
 
 
 //------------------------Variables------------------------\\
@@ -127,18 +125,3 @@ RCS on.
 wait until alt:radar <= startalt().
 lock throttle to 0.7-throt().
 wait until false.
-//------------------------LANDING------------------------\\
-
-lock steering to srfRetrograde.
-Brakes on.
-SAS OFF.
-RCS ON.
-lock steering to srfRetrograde.
-wait until alt:radar <=80000.
-lock steering to getsteering().
-wait until alt:radar <=10000.
-wait until alt:radar <= startalt().
-lock throttle to throt().
-wait until false.
-
-
