@@ -7,13 +7,13 @@ Boostback code need to be launched before boostback start, or at launch
 ld code is a function that you can add to the codes if you want the loading distance of kOS to change, it helps have visible camera feed and objects at a wanted distance, thanks to it you can put starship in orbit, while superheavy lands.
 
 # Codes : 
-Mechazilla : 99%
+ - Mechazilla : 99%
 # Booster :
 Landing : 80 %
-Boostback : 95%
+ - Boostback : 95%
 # Starship :
-Landing : 0%
-Orbit : 0%
+ -Landing : 0%
+ -Orbit : 0%
 
  # Dependencies :
  - Starship Launch Expansion 
