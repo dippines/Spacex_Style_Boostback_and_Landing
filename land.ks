@@ -1,6 +1,3 @@
-// use at your own risk, I'll detail each terms soon
-
-
 //------------------------Variables------------------------\\
 
 //------------Lists------------\\
@@ -53,10 +50,7 @@ return ship:geoposition.
 }
 
 //------------AoA------------\\
-function tf {
 
-    // to come
-}
 function i {
     if alt:radar > alts[0] {
         return 0.
@@ -75,18 +69,17 @@ function fdynaoax {
     local errorVector is getimpact():position - landingsite:position.
     local H1 is errorVector:mag.
     lock rx to i().
-    set tfx to 1.
     if alts[rx] <= alt:radar {
-        if H1 < 50 {
+        if H1 < 40 {
             if throttle > 0 {
                 set maoa[4] to vang(-ship:velocity:surface, ship:up:vector).
-                set fx to tfx*2*f[0].
+                set fx to f[0].
             }
         else {set fx to f[1].}
         } else {
             if throttle > 0 {
                 set maoa[4] to vang(-ship:velocity:surface, ship:up:vector).
-                set fx to tfx*f[1].
+                set fx to f[1].
             } 
         else {set fx to f[0].}
         }
@@ -106,7 +99,8 @@ function getSteering {
     if vang(result, velVector) > aoa {
         set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
     }
-    return lookdirup(result, facing:topvector).
+    lock val to lookdirup(result, facing:topvector).
+    return R(val:pitch,val:yaw,45).
 }
 
 //------------------------LANDING------------------------\\
@@ -123,5 +117,8 @@ lock steering to getsteering().
 wait until alt:radar <=10000.
 RCS on.
 wait until alt:radar <= startalt().
-lock throttle to 0.7-throt().
+lock throttle to 0.7+throt().
+wait until alt:radar <= 200.
+lock steering to up.
+lock throttle to 0.1.
 wait until false.
