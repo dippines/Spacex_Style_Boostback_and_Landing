@@ -1,4 +1,11 @@
 
+
+// DISCLAIMER : This code is just a copy-paste of the code in the Falcon-9 folder, the only difference is the Mechazilla function (which works)
+// As it works the same, the values used and the main code is not based for superheavy, I'd say it'll be around november(2025)
+
+
+
+
 //------------------------Variables------------------------\\
 
 //------------Lists------------\\
@@ -13,36 +20,23 @@ set maoa to list(3,4,5,3,2). // The AoAs, each value represent the value of the 
 if hastarget { 
     set landingsite to latlng(target:geoposition:lat, target:geoposition:lng).
 } else {
-    set landingsite to latlng(28.4971749954165,-80.5349879288904-0.0003). // Your landingsite position
+    set landingsite to latlng(28.4971749954165,-80.5349879288904). // Your landingsite position
 }
 
 
 //------------------------Functions------------------------\\
 
 //------------Throttle------------\\
-function drag {
-    set vec to ship:velocity:surface.
-    set vx to vec:x.
-    set vy to vec:y.
-    set vz to vec:z.
-    set Speed to ((vx^2)+(vy^2)+(vz^2))^.5.
-    set qx to ship:q.
-    set A to ship:mass*.008.
-    return A*qx*Speed.
 
-
-
-
-}
 function startalt {
-    lock v1 to abs(1500)/2. 
+    lock v1 to ship:verticalSpeed/2. 
     lock Fr to ship:maxthrust.
     lock dm to ship:drymass.
     lock M to (ship:mass+dm)/2. 
     lock g to constant:g * body:mass / body:radius^2.		
-    lock n to 0.9.
-    lock fd to drag().
-    lock h to (v1^2)/(2*(n*(Fr/M)-g-(fd/M))). // The altitude you want to start throttling IF the throttle = n
+    lock n to 0.95.
+    lock k to 1.3.
+    lock h to (v1^2)/(k*(n*(Fr/M)-g)).
     return h.
 }
 
@@ -54,7 +48,6 @@ lock throttleAdjustment to (speedError * ship:mass) / (ship:availablethrust + gr
 lock ApproachThrottle to throttleAdjustment.
 return ApproachThrottle. // Gives a throttle that fixes you at a certain speed (not to mistake with hovering)
 }
-
 
 //------------Error vector------------\\
 function errorVector {   
@@ -145,20 +138,17 @@ Brakes on. // And open gridfins
 SAS OFF.
 RCS ON.
 wait until alt:radar <=80000. // Until you enter atmosphere
-
 lock steering to getsteering(). // And you start correcting your trajectory
-wait until alt:radar <=15000.
-RCS on. 
-until alt:radar <= startalt() {
-    wait 0.05.
-    print(startalt).
-}
+wait until alt:radar <= 20000.
+wait until ship:verticalspeed >= -1300.
+RCS on.
+set al to startalt().
+print(startalt()).
+wait until alt:radar <= al.
 lock throttle to 1.
-wait until ship:verticalspeed >= -100. // Then when you've braked enough
+wait until ship:verticalspeed >= -100.
 toggle ag1. // You skip to your last engine sequence
-lock throttle to fnthrot(-30). // And throttle at a specific value
-wait until ship:verticalspeed >= -45.
-lock throttle to fnthrot(-5). 
-
+lock throttle to fnthrot(-70).
+wait until alt:radar <=200.
+lock throttle to fnthrot(-10).
 wait until ag10. // To end just press ag10.
-
