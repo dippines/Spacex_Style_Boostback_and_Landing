@@ -1,15 +1,12 @@
-This code work for both Falcon 9 and Starship.
-
-
 I highly recommend using Visual studio code for reading.
-You can credit me if you use the code but I don't really care.
-
+You can credit me if you use the codes but I don't really care.
+Known errors : Can't boostback if the landingposition is "before you", and if the landingpos=launchpos
 
 # Codes : 
  - Mechazilla : 99%
 # Boosters :
  - Landing : 90 % (F9) 50% (SH)
- - Boostback : 95% (Both)
+ - Boostback : 95% (Both) 
 # Starship :
  -Landing : 0%
  -Orbit : 0%
