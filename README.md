@@ -1,6 +1,6 @@
 I highly recommend using Visual studio code for reading.
 You can credit me if you use the codes but I don't really care.
-
+I'd say that booster landing codes will be finished this year (2025) and for starship I hope next year. But idk if KSA will have something like kOS.
 # Codes : 
  - Mechazilla : 99%
 # Boosters :
