@@ -1,3 +1,27 @@
+
+
+
+
+
+
+
+
+
+// SAVOIR PRECISEMENT QUAND POUSSER à 1 POUR ATTEINDRE UNE VITESSE 0 A L'ALTITUDE 0ù
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //------------------------Variables------------------------\\
 
 //------------Lists------------\\
@@ -12,28 +36,42 @@ set maoa to list(3,4,5,3,2). // The AoAs, each value represent the value of the 
 if hastarget { 
     set landingsite to latlng(target:geoposition:lat, target:geoposition:lng).
 } else {
-    set landingsite to latlng(28.4971749954165,-80.5349879288904). // Your landingsite position
+    set landingsite to latlng(28.4971749954165,-80.5349879288904-0.0003). // Your landingsite position
 }
 
 
 //------------------------Functions------------------------\\
 
 //------------Throttle------------\\
+function drag {
+    set vec to ship:velocity:surface.
+    set vx to vec:x.
+    set vy to vec:y.
+    set vz to vec:z.
+    set Speed to ((vx^2)+(vy^2)+(vz^2))^.5.
+    set qx to ship:q.
+    set A to ship:mass*.008.
+    return A*qx*Speed.
 
+
+
+
+}
 function startalt {
-    lock v1 to -ship:verticalspeed. 
+    lock v1 to abs(1500)/2. 
     lock Fr to ship:maxthrust.
-    lock M to ship:mass.
+    lock dm to ship:drymass.
+    lock M to (ship:mass+dm)/2. 
     lock g to constant:g * body:mass / body:radius^2.		
-    lock n to 1. // Should always be > to your desired throttle
-    lock h to (v1^2)/(2*(n*(Fr/M)-g)). // The altitude you want to start throttling IF the throttle = n
+    lock n to 0.9.
+    lock fd to drag().
+    lock h to (v1^2)/(2*(n*(Fr/M)-g-(fd/M))). // The altitude you want to start throttling IF the throttle = n
     return h.
 }
 
 function fnthrot {
-    
+    parameter targetSpeed.
 lock gravityForce to ship:mass * g.
-set targetSpeed to -15. 
 lock speedError to targetSpeed - ship:verticalspeed.
 lock throttleAdjustment to (speedError * ship:mass) / (ship:availablethrust + gravityForce).
 lock ApproachThrottle to throttleAdjustment.
@@ -108,7 +146,6 @@ function getSteering {
     return val.
 }
 
-
 //------------Mechazilla------------\\
 function mechazilla {
 
@@ -124,17 +161,6 @@ function mechazilla {
 
 
 
-function fuel {
-    local isp is 300.
-    local deltav is ship:deltav:current.
-    local mass_initial is ship:mass.
-    local mass_final is mass_initial / constant:e^(deltaV / (Isp * constant:G0)).
-    local t is mass_initial - mass_final.
-    local unitmass is ship:liquidfuel:mass / ship:liquidfuel.
-    local needed is t / unitmass.
-    return needed.                                                          // W.I.P. #1
-
-}
 
 wait until ship:verticalspeed <0. // When you start the descent
 lock steering to srfRetrograde. // You lock steering to retrograde
@@ -142,14 +168,19 @@ Brakes on. // And open gridfins
 SAS OFF.
 RCS ON.
 wait until alt:radar <=80000. // Until you enter atmosphere
-RCS OFF. // Then you don't really need rcs
+
 lock steering to getsteering(). // And you start correcting your trajectory
-wait until alt:radar <=10000. // When the hoverslam will soon start
+wait until alt:radar <=15000.
 RCS on. 
-// W.I.P. #1
-wait until alt:radar <= startalt(). // You need to start the hoverslam
-lock throttle to 0.9. // So you throttle just a little bit less than the n value (IT SHOULD NEVER BE >, i dont really know if it can be =)
-wait until ship:verticalspeed >= -50. // Then when you've braked enough
+until alt:radar <= startalt() {
+    wait 0.05.
+    print(startalt).
+}
+lock throttle to 1.
+wait until ship:verticalspeed >= -100. // Then when you've braked enough
 toggle ag1. // You skip to your last engine sequence
-lock throttle to fnthrot(). // And throttle at a specific value
+lock throttle to fnthrot(-30). // And throttle at a specific value
+wait until ship:verticalspeed >= -45.
+lock throttle to fnthrot(-5). 
+
 wait until ag10. // To end just press ag10.
