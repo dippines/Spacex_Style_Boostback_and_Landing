@@ -1,6 +1,5 @@
 I highly recommend using Visual studio code for reading.
 You can credit me if you use the codes but I don't really care.
-Known errors : Can't boostback if the landingposition is "before you", and if the landingpos=launchpos
 
 # Codes : 
  - Mechazilla : 99%
@@ -25,3 +24,6 @@ Known errors : Can't boostback if the landingposition is "before you", and if th
 - Vent Mod 
 - RSS
 - OCISLY (cam previews)
+
+# Known errors :
+ - Can't boostback if the landingposition is "before you", and if the landingpos=launchpos
