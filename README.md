@@ -4,7 +4,7 @@ You can credit me if you use the codes but I don't really care.
 # Codes : 
  - Mechazilla : 99%
 # Boosters :
- - Landing : 90 % (F9) 50% (SH)
+ - Landing : 90 % (F9) 70% (SH)
  - Boostback : 95% (Both) 
 # Starship :
  -Landing : 0%
