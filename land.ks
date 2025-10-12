@@ -1,27 +1,4 @@
 
-
-
-
-
-
-
-
-
-// SAVOIR PRECISEMENT QUAND POUSSER à 1 POUR ATTEINDRE UNE VITESSE 0 A L'ALTITUDE 0ù
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //------------------------Variables------------------------\\
 
 //------------Lists------------\\
@@ -184,3 +161,4 @@ wait until ship:verticalspeed >= -45.
 lock throttle to fnthrot(-5). 
 
 wait until ag10. // To end just press ag10.
+
