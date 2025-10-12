@@ -114,16 +114,6 @@ function getSteering {
     return val.
 }
 
-//------------Mechazilla------------\\
-function mechazilla {
-
-    SET MESSAGE TO "Connecting Mechazilla and booster".
-    SET C TO VESSEL("Mechazilla"):CONNECTION.
-    IF C:SENDMESSAGE(MESSAGE) {                         // This is why you need to run MZ code before launching
-        PRINT "Catching".                               // This function send a message to Mechazilla so it can understand it need to act
-    }
-    
-}
 
 //------------------------LANDING------------------------\\
 
