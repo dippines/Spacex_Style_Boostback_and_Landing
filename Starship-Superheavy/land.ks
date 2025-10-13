@@ -3,7 +3,7 @@
 //------------Lists------------\\
 set alts to list(50000,25000,13500,5000,20). // The stages of your flight. Feel free to change
 set f to list(-1,1). // Factor for the angle of attack (aoa)
-set maoa to list(3,4,5,3,2). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
+set maoa to list(3,8,6,5,4). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
 
 //------------Target------------\\
 //set LZ1 to latlng(28.6083884601472,-80.6497481659008).
@@ -22,6 +22,7 @@ if hastarget {
 
 function fnthrot {
     parameter targetSpeed.
+lock g to constant:g * body:mass / body:radius^2.
 lock gravityForce to ship:mass * g.
 lock speedError to targetSpeed - ship:verticalspeed.
 lock throttleAdjustment to (speedError * ship:mass) / (ship:availablethrust + gravityForce).
@@ -93,7 +94,7 @@ function getSteering {
         set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
     }
     lock val to lookdirup(result, facing:topvector).
-    return R(val:pitch,val:yaw,-90).
+    return R(val:pitch,val:yaw,90).
 }
 
 //------------Mechazilla------------\\
@@ -110,17 +111,14 @@ function mechazilla {
 //------------------------LANDING------------------------\\
 
 function final{
-if alt:radar <=5000. {
-    if ship:verticalspeed <=-300 {
         lock throttle to 1.
         lock steering to getSteering().
-    } else if ship:verticalSpeed <=-80 {
+        wait until ship:verticalspeed >=-80.
         toggle ag1.
-        lock throttle to fnthrot(-10).
-        lock steering to up.//+angle vers ldngpos + Compenser horizontal + RCS
-    }
+        lock throttle to fnthrot(-50).
+        lock steering to up.
 }
-}
+
 
 
 wait until ship:verticalspeed <0. // When you start the descent
@@ -130,6 +128,6 @@ SAS OFF.
 RCS ON.
 wait until alt:radar <=80000. // Until you enter atmosphere
 lock steering to getsteering(). // And you start correcting your trajectory
-wait until alt:radar <=5000.
+wait until alt:radar <=1000.
 final().
 wait until ag10. // To end just press ag10.
