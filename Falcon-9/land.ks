@@ -2,7 +2,7 @@
 // What you should change to adapt it to you : 
 // - Landingsites positions
 // - k value in startalt()
-
+// The code still have many flaws, but will sure get you on point
 
 //------------------------Variables------------------------\\
 
@@ -32,8 +32,8 @@ function startalt {
     lock dm to ship:drymass.
     lock M to (ship:mass+dm)/2. 
     lock g to constant:g * body:mass / body:radius^2.		
-    lock n to 0.95.
-    lock k to 1.3. // Normally it's 2 but change it to fit your needs 
+    lock n to 0.95. // Expected throttle
+    lock k to 1.27. // Adapt this to you the greater it is, the lower your h will be 
     lock h to (v1^2)/(k*(n*(Fr/M)-g)).
     return h.
 }
@@ -81,7 +81,7 @@ function fdynaoax { // /!\ I try to use common terms in here for you to understa
     local H1 is errorVector:mag. // Scalar value of the error vector
     lock rx to i().
     if alts[rx] <= alt:radar { // <==> If you are in the range of the values in alts
-        if H1 < 15 { // If you're impact-pos is in a radius of 15m of landingsite
+        if H1 < 8 { // If you're impact-pos is in a radius of 15m of landingsite
             if throttle > 0 {
                 set maoa[4] to vang(-ship:velocity:surface, ship:up:vector). // [4] <==> Hoverslam
                 set fx to f[0]. // You break
@@ -114,7 +114,6 @@ function getSteering {
     return val.
 }
 
-
 //------------------------LANDING------------------------\\
 
 
@@ -127,16 +126,16 @@ SAS OFF.
 RCS ON.
 wait until alt:radar <=80000. // Until you enter atmosphere
 lock steering to getsteering(). // And you start correcting your trajectory
-wait until alt:radar <= 20000. // When you're into atmosphere
-wait until ship:verticalspeed >= -1300. // Wait until terminal velocity (if you use tundra falcon 9 keep this)
+wait until alt:radar <= 20000.
+wait until ship:verticalspeed >= -1300.
 RCS on.
-set al to startalt(). // Take the hoverslam starting altitude
-print(startalt()).
-wait until alt:radar <= al.
-lock throttle to 1. // Start hoverslam
-wait until ship:verticalspeed >= -100. // Final corrections
-toggle ag1. // one engine 
-lock throttle to fnthrot(-70).
-wait until alt:radar <=200.
-lock throttle to fnthrot(-10).
+set al to startalt().
+wait until altitude <= al.
+lock throttle to 1.
+wait until ship:verticalspeed >= -100.
+toggle ag1. // You skip to your last engine sequence
+lock throttle to fnthrot(-20).
+lock steering to up.
+wait until altitude <=300.
+lock throttle to fnthrot(-5).
 wait until ag10. // To end just press ag10.
