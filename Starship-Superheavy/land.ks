@@ -1,3 +1,6 @@
+// When changing variables just remember that superheavy is a lot less controlable than falcon 9
+
+
 //------------------------Variables------------------------\\
 
 //------------Lists------------\\
@@ -131,3 +134,4 @@ lock steering to getsteering(). // And you start correcting your trajectory
 wait until alt:radar <=1000.
 final().
 wait until ag10. // To end just press ag10.
+
