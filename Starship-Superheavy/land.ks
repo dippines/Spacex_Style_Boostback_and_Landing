@@ -1,11 +1,3 @@
-
-
-// DISCLAIMER : This code is just a copy-paste of the code in the Falcon-9 folder, the only difference is the Mechazilla function (which works)
-// As it works the same, the values used and the main code is not based for superheavy, I'd say it'll be around november(2025)
-
-
-
-
 //------------------------Variables------------------------\\
 
 //------------Lists------------\\
@@ -27,18 +19,6 @@ if hastarget {
 //------------------------Functions------------------------\\
 
 //------------Throttle------------\\
-
-function startalt {
-    lock v1 to ship:verticalSpeed/2. 
-    lock Fr to ship:maxthrust.
-    lock dm to ship:drymass.
-    lock M to (ship:mass+dm)/2. 
-    lock g to constant:g * body:mass / body:radius^2.		
-    lock n to 0.95.
-    lock k to 1.3.
-    lock h to (v1^2)/(k*(n*(Fr/M)-g)).
-    return h.
-}
 
 function fnthrot {
     parameter targetSpeed.
@@ -113,7 +93,7 @@ function getSteering {
         set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
     }
     lock val to lookdirup(result, facing:topvector).
-    return val.
+    return R(val:pitch,val:yaw,-90).
 }
 
 //------------Mechazilla------------\\
@@ -129,7 +109,18 @@ function mechazilla {
 
 //------------------------LANDING------------------------\\
 
-
+function final{
+if alt:radar <=5000. {
+    if ship:verticalspeed <=-300 {
+        lock throttle to 1.
+        lock steering to getSteering().
+    } else if ship:verticalSpeed <=-80 {
+        toggle ag1.
+        lock throttle to fnthrot(-10).
+        lock steering to up.//+angle vers ldngpos + Compenser horizontal + RCS
+    }
+}
+}
 
 
 wait until ship:verticalspeed <0. // When you start the descent
@@ -139,16 +130,6 @@ SAS OFF.
 RCS ON.
 wait until alt:radar <=80000. // Until you enter atmosphere
 lock steering to getsteering(). // And you start correcting your trajectory
-wait until alt:radar <= 20000.
-wait until ship:verticalspeed >= -1300.
-RCS on.
-set al to startalt().
-print(startalt()).
-wait until alt:radar <= al.
-lock throttle to 1.
-wait until ship:verticalspeed >= -100.
-toggle ag1. // You skip to your last engine sequence
-lock throttle to fnthrot(-70).
-wait until alt:radar <=200.
-lock throttle to fnthrot(-10).
+wait until alt:radar <=5000.
+final().
 wait until ag10. // To end just press ag10.
