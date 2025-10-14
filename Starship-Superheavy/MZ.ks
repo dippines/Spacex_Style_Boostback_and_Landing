@@ -1,19 +1,13 @@
 clearscreen.
 print "Waiting for Booster Signal acquisition".
-Signal().
-function Signal {
-  until false {
-    WHEN NOT SHIP:MESSAGES:EMPTY then {
-      arms().
-    }  
-  }
-}
 
-function arms {
- until vessel("Heavy Booster"):altitude <=200 {
-   angle().
- }
- ag1 on.
+until false {
+  WHEN NOT SHIP:MESSAGES:EMPTY then {
+    until vessel("Heavy Booster"):altitude <=200 {
+        angle().
+    }
+    ag1 on. // Close arms
+  }  
 }
 
 function angle {  // Target angle
@@ -25,11 +19,6 @@ function angle {  // Target angle
   lock mDist to (v1 - vxcl(up:vector, SHIP:geoposition:position)):mag.
   if mdist <20 {
     ag1 on.
-  } else {
-    print "mdist " + mdist.
   }
-  print "target angle : " + ang.
   MZANG:setfield("target angle",ang).
 }
-
-//This code works perfectly but I need to update it because there are too many loops. 
