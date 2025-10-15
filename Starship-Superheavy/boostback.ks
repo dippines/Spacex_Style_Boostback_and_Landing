@@ -66,12 +66,18 @@ until lngoff > x and abs(latoff) < y or AG10 {
             lock tilt to 5.
         }
     //--Steering -------------------------------------------|
-    if launchpos:lat - landingsite:lat >0.0015 {
-        lock steering to heading(landingsite:heading+ang, tilt).
-    } else if launchpos:lat - landingsite:lat <0.0015{
-        lock steering to heading(landingsite:heading-ang, tilt).
+    if launchpos:lng - landingsite:lng < 0 {
+        set k to -1.
+    } else {
+        set k to 1.
+    }
+
+    if launchpos:lat - landingsite:lat >0.002 {
+        lock steering to heading(k*landingsite:heading+ang, tilt).
+    } else if launchpos:lat - landingsite:lat <-0.002{
+        lock steering to heading(k*landingsite:heading-ang, tilt).
     } else{
-        lock steering to heading(landingsite:heading, tilt).
+        lock steering to heading(k*landingsite:heading, tilt).
     }
     //--Throttle------------------------------|
     lock bbt to errorVector():mag/t1:mag.
@@ -80,3 +86,4 @@ until lngoff > x and abs(latoff) < y or AG10 {
 wait 0.1.
 }
 toggle ag7.
+
