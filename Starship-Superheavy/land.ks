@@ -1,9 +1,37 @@
+set distance to 150000.
+function ld {
+SET kuniverse:defaultloaddistance:flying:LOAD TO distance.   
+SET kuniverse:defaultloaddistance:flying:UNLOAD TO distance. 
+SET kuniverse:defaultloaddistance:flying:UNPACK TO distance. 
+SET kuniverse:defaultloaddistance:flying:PACK TO distance.   
+SET kuniverse:defaultloaddistance:escaping:LOAD TO distance.   
+SET kuniverse:defaultloaddistance:escaping:UNLOAD TO distance. 
+SET kuniverse:defaultloaddistance:escaping:UNPACK TO distance. 
+SET kuniverse:defaultloaddistance:escaping:PACK TO distance.   
+SET kuniverse:defaultloaddistance:SUBORBITAL:LOAD TO distance.   
+SET kuniverse:defaultloaddistance:SUBORBITAL:UNLOAD TO distance. 
+SET kuniverse:defaultloaddistance:SUBORBITAL:UNPACK TO distance. 
+SET kuniverse:defaultloaddistance:SUBORBITAL:PACK TO distance.   
+SET kuniverse:defaultloaddistance:ORBIT:LOAD TO distance.   
+SET kuniverse:defaultloaddistance:ORBIT:UNLOAD TO distance. 
+SET kuniverse:defaultloaddistance:ORBIT:UNPACK TO distance. 
+SET kuniverse:defaultloaddistance:ORBIT:PACK TO distance.   
+SET kuniverse:defaultloaddistance:prelaunch:LOAD TO distance.   
+SET kuniverse:defaultloaddistance:prelaunch:UNLOAD TO distance. 
+SET kuniverse:defaultloaddistance:prelaunch:UNPACK TO distance. 
+SET kuniverse:defaultloaddistance:prelaunch:PACK TO distance.   
+SET kuniverse:defaultloaddistance:landed:LOAD TO distance.   
+SET kuniverse:defaultloaddistance:landed:UNLOAD TO distance. 
+SET kuniverse:defaultloaddistance:landed:UNPACK TO distance. 
+SET kuniverse:defaultloaddistance:landed:PACK TO distance.   
+}
+ld().
 //------------------------Variables------------------------\\
 
 //------------Lists------------\\
 set alts to list(50000,25000,13500,5000,20). // The stages of your flight. Feel free to change
 set f to list(-1,1). // Factor for the angle of attack (aoa)
-set maoa to list(4,10,8,5,1). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
+set maoa to list(4,10,6,5,3). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
 
 //------------Target------------\\
 //set LZ1 to latlng(28.6083884601472,-80.6497481659008).
@@ -12,7 +40,7 @@ set maoa to list(4,10,8,5,1). // The AoAs, each value represent the value of the
 if hastarget { 
     set landingsite to latlng(target:geoposition:lat, target:geoposition:lng).
 } else {
-    set landingsite to latlng(28.637138460196,-80). // Your landingsite position
+    set landingsite to latlng(28.637138460196,-80.6050788442709). // Your landingsite position
 }
 
 
@@ -68,8 +96,8 @@ function fdynaoax { // /!\ I try to use common terms in here for you to understa
         if H1 < radius { // If you're impact-pos is in a radius of 10m of landingsite
             if throttle > 0{
                 if ship:verticalspeed >=-80 {
-                    set maoa[4] to vang(-ship:velocity:surface, ship:up:vector). // 3 engines corrections
-                    set radius to 5.
+                    set maoa[4] to 1.2*vang(-ship:velocity:surface, ship:up:vector). // 3 engines corrections
+                    set radius to 2.
                 } else {
                     set fx to f[0]. // You slow down (13 engines)
                 }
@@ -78,7 +106,7 @@ function fdynaoax { // /!\ I try to use common terms in here for you to understa
         } else {
             if throttle > 0 {
                 if ship:verticalspeed >=-80 {
-                    set maoa[4] to vang(-ship:velocity:surface, ship:up:vector). //  3 engines corrections
+                    set maoa[4] to 1.5*vang(-ship:velocity:surface, ship:up:vector). //  3 engines corrections
                     set radius to 5.
                 } else {
                     set fx to f[1]. // You're outside the radius so you throttle in direction of it
@@ -124,10 +152,10 @@ function final{
     // avoir un vrai déclencheur
         lock throttle to 1.
         lock steering to getSteering().
-        //mechazilla().
         wait until ship:verticalspeed >=-80.
         toggle ag1.
-        lock throttle to fnthrot(-50).
+        mechazilla().
+        lock throttle to fnthrot(-25).
         lock steering to getSteering().
 }
 
@@ -140,6 +168,6 @@ SAS OFF.
 RCS ON.
 wait until alt:radar <=80000. // Until you enter atmosphere
 lock steering to getsteering(). // And you start correcting your trajectory
-wait until alt:radar <=1500.
+wait until alt:radar <=1200.
 final().
 wait until ag10. // To end just press ag10.
