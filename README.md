@@ -28,7 +28,8 @@ I highly recommend using Visual studio code for reading.
 - Fix boostback for droneship landing and superheavy RTLS ✅(15/10/2025) V.FINAL
 - Fix superheavy AoAs to land in water at wanted pos ✅(15/10/2025) V.FINAL
 - Program superheavy steering and throttle to land precisely, while cancelling horizontalspeed ➖ V1.0 (15/10/2025)
-- Fix RTLS boostback(with RCS and better vectors)
+- Fix RTLS boostback(with RCS and better vectors) (In october) 
+- Better automatisation for boostback sequence of superheavy (In october) 
 - Fix fuel level during boostback and for landing (In october) 
 - Put starship in orbit / IFT-like trajectory (Before december)
 - Starship precise position landing code (NET 2026)
