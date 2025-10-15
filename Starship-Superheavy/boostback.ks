@@ -1,9 +1,9 @@
 //--Variables--\\
 
-set meco to 70000. // Boostback start altitude.
+set meco to 75000. // Boostback start altitude.
 set maxalt to 100000. //max alt you want the apoapsis of the boostback to go to : W.I.P.
-set launchpos to latlng(28.6083884601472,-80.6497481659008). // launchsite position
-lock landingsite to latlng(28.4971749954165,-80.5349879288904). // latlng coordinates of your desired landingsite
+set launchpos to latlng(28.637138460196,-80.6050788442709). // launchsite position
+lock landingsite to latlng(28.637138460196,-80). // latlng coordinates of your desired landingsite
 
 
 //--Functions--\\
@@ -60,21 +60,23 @@ until lngoff > x and abs(latoff) < y or AG10 {
     lock ang to VANG(corr, errorVector()).// Angle between the latest vec and errorvec, you want this to be = 0
     //--Tilt-------------|
     lock pr to t1:mag/maxalt.
-    if apoapsis>=maxalt {
-        lock tilt to -5.
-    } else {
-        lock tilt to 5.
-    }
+        if apoapsis>=maxalt {
+            lock tilt to -15.
+        } else {
+            lock tilt to 5.
+        }
     //--Steering -------------------------------------------|
-    if launchpos:lat - landingsite:lat >0 {
+    if launchpos:lat - landingsite:lat >0.0015 {
         lock steering to heading(landingsite:heading+ang, tilt).
-    } else if launchpos:lat - landingsite:lat <0{
+    } else if launchpos:lat - landingsite:lat <0.0015{
         lock steering to heading(landingsite:heading-ang, tilt).
-    } else if launchpos:lat - landingsite:lat =0 {
+    } else{
         lock steering to heading(landingsite:heading, tilt).
     }
     //--Throttle------------------------------|
     lock bbt to errorVector():mag/t1:mag.
+    toggle ag7.
     lock throttle to abs(min(max(bbt,0.05),1))*pr.
-    wait 0.1.
+wait 0.1.
 }
+toggle ag7.
