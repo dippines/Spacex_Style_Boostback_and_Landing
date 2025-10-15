@@ -1,21 +1,18 @@
-// When changing variables just remember that superheavy is a lot less controlable than falcon 9
-
-
 //------------------------Variables------------------------\\
 
 //------------Lists------------\\
 set alts to list(50000,25000,13500,5000,20). // The stages of your flight. Feel free to change
 set f to list(-1,1). // Factor for the angle of attack (aoa)
-set maoa to list(3,8,6,5,4). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
+set maoa to list(4,10,8,5,2). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
 
 //------------Target------------\\
 //set LZ1 to latlng(28.6083884601472,-80.6497481659008).
 //set OCISLY to latlng(28.6356819213369,-79.4865254914434)
-
+//LPD latlng(28.6373715753433,-80.6050788442709)
 if hastarget { 
     set landingsite to latlng(target:geoposition:lat, target:geoposition:lng).
 } else {
-    set landingsite to latlng(28.4971749954165,-80.5349879288904). // Your landingsite position
+    set landingsite to latlng(28.637138460196,-80). // Your landingsite position
 }
 
 
@@ -67,14 +64,14 @@ function fdynaoax { // /!\ I try to use common terms in here for you to understa
     local H1 is errorVector:mag. // Scalar value of the error vector
     lock rx to i().
     if alts[rx] <= alt:radar { // <==> If you are in the range of the values in alts
-        if H1 < 15 { // If you're impact-pos is in a radius of 15m of landingsite
-            if throttle > 0 {
+        if H1 < 10 { // If you're impact-pos is in a radius of 20m of landingsite
+            if throttle > 0 and ship:verticalspeed <=-80{
                 set maoa[4] to vang(-ship:velocity:surface, ship:up:vector). // [4] <==> Hoverslam
                 set fx to f[0]. // You break
             }
             else {set fx to f[1].} // You don't throttle so you just follow the trajectory
         } else {
-            if throttle > 0 {
+            if throttle > 0 and ship:verticalspeed <=-80 {
                 set maoa[4] to vang(-ship:velocity:surface, ship:up:vector). // [4] <==> Hoverslam
                 set fx to f[1]. // You're outside the radius so you throttle in direction of it
             } 
@@ -97,7 +94,8 @@ function getSteering {
         set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
     }
     lock val to lookdirup(result, facing:topvector).
-    return R(val:pitch,val:yaw,90).
+    return val.
+    // return R(val:pitch,val:yaw,270).
 }
 
 //------------Mechazilla------------\\
@@ -114,12 +112,14 @@ function mechazilla {
 //------------------------LANDING------------------------\\
 
 function final{
+    // avoir un vrai déclencheur
         lock throttle to 1.
         lock steering to getSteering().
+        //mechazilla().
         wait until ship:verticalspeed >=-80.
         toggle ag1.
         lock throttle to fnthrot(-50).
-        lock steering to up.
+        lock steering to getSteering().
 }
 
 
@@ -131,7 +131,6 @@ SAS OFF.
 RCS ON.
 wait until alt:radar <=80000. // Until you enter atmosphere
 lock steering to getsteering(). // And you start correcting your trajectory
-wait until alt:radar <=1000.
+wait until alt:radar <=1500.
 final().
 wait until ag10. // To end just press ag10.
-
