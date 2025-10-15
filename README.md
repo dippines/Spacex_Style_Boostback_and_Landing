@@ -23,5 +23,11 @@ I highly recommend using Visual studio code for reading.
 - RSS
 - OCISLY (cam previews)
 
-# Known errors :
- - Can't boostback if the landingposition is "before you", and if the landingpos=launchpos : SOLVED
+
+# TO-DO (In order)
+- Fix boostback for droneship landing and superheavy RTLS ✅(15/10)
+- Fix superheavy AoAs to land in water at wanted pos (Before november)
+- Program superheavy steering and throttle to land precisely, while cancelling horizontalspeed (before december)
+- Fix fuel level during boostback and for landing (Before january) 
+- Put starship in orbit / IFT-like trajectory (Before january)
+- Starship precise position landing code (NET 2026)
