@@ -54,15 +54,19 @@ lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472.
         }
 
         //--Steering -------------------------------------------|
-
-        if launchpos:lat - landingsite:lat >0.0015 {
-            lock steering to heading (landingsite:heading+ang, tilt).
-        } else if launchpos:lat - landingsite:lat <0.0015{
-            lock steering to heading (landingsite:heading-ang, tilt).
+        if launchpos:lng - landingsite:lng < 0 {
+            set k to -1.
         } else {
-            lock steering to heading (landingsite:heading, tilt).
+            set k to 1.
         }
 
+        if launchpos:lat - landingsite:lat >0.002 {
+            lock steering to heading(k*landingsite:heading+ang, tilt).
+        } else if launchpos:lat - landingsite:lat <-0.002{
+            lock steering to heading(k*landingsite:heading-ang, tilt).
+        } else{
+            lock steering to heading(k*landingsite:heading, tilt).
+        }
         //--Throttle------------------------------|
 
         lock bbt to errorVector():mag/t1:mag.
