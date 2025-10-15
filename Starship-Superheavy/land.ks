@@ -1,31 +1,4 @@
-set distance to 150000.
-function ld {
-SET kuniverse:defaultloaddistance:flying:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:flying:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:flying:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:flying:PACK TO distance.   
-SET kuniverse:defaultloaddistance:escaping:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:escaping:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:escaping:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:escaping:PACK TO distance.   
-SET kuniverse:defaultloaddistance:SUBORBITAL:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:SUBORBITAL:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:SUBORBITAL:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:SUBORBITAL:PACK TO distance.   
-SET kuniverse:defaultloaddistance:ORBIT:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:ORBIT:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:ORBIT:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:ORBIT:PACK TO distance.   
-SET kuniverse:defaultloaddistance:prelaunch:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:prelaunch:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:prelaunch:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:prelaunch:PACK TO distance.   
-SET kuniverse:defaultloaddistance:landed:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:landed:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:landed:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:landed:PACK TO distance.   
-}
-ld().
+
 //------------------------Variables------------------------\\
 
 //------------Lists------------\\
@@ -171,3 +144,4 @@ lock steering to getsteering(). // And you start correcting your trajectory
 wait until alt:radar <=1200.
 final().
 wait until ag10. // To end just press ag10.
+
