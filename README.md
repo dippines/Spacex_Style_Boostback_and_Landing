@@ -3,10 +3,10 @@ I highly recommend using Visual studio code for reading.
  - Mechazilla : 99% (I haven't tested yet the new version)
 # Boosters :
  - Landing : 90 % (F9) 95% (SH) /see TO-DO/
- - Boostback : 100%, If you encouter an error : leave a comment on the ytb video you found my code please
+ - Boostback : 95%, known issue, latitude is not enough precise (~1km) when RTLS
 # Starship :
- -Landing : 0%
- -Orbit : 0%
+ - Landing : 0%
+ - Orbit : 0%
 
  # Dependencies :
  - Starship Launch Expansion 
