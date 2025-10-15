@@ -24,4 +24,4 @@ I highly recommend using Visual studio code for reading.
 - OCISLY (cam previews)
 
 # Known errors :
- - Can't boostback if the landingposition is "before you", and if the landingpos=launchpos
+ - Can't boostback if the landingposition is "before you", and if the landingpos=launchpos : SOLVED
