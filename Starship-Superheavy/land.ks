@@ -3,7 +3,7 @@
 //------------Lists------------\\
 set alts to list(50000,25000,13500,5000,20). // The stages of your flight. Feel free to change
 set f to list(-1,1). // Factor for the angle of attack (aoa)
-set maoa to list(4,10,8,5,2). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
+set maoa to list(4,10,8,5,1). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
 
 //------------Target------------\\
 //set LZ1 to latlng(28.6083884601472,-80.6497481659008).
@@ -63,17 +63,26 @@ function fdynaoax { // /!\ I try to use common terms in here for you to understa
     local errorVector is getimpact():position - landingsite:position.
     local H1 is errorVector:mag. // Scalar value of the error vector
     lock rx to i().
+    set radius to 10. //radius of 20m of landingsite
     if alts[rx] <= alt:radar { // <==> If you are in the range of the values in alts
-        if H1 < 10 { // If you're impact-pos is in a radius of 20m of landingsite
-            if throttle > 0 and ship:verticalspeed <=-80{
-                set maoa[4] to vang(-ship:velocity:surface, ship:up:vector). // [4] <==> Hoverslam
-                set fx to f[0]. // You break
+        if H1 < radius { // If you're impact-pos is in a radius of 10m of landingsite
+            if throttle > 0{
+                if ship:verticalspeed >=-80 {
+                    set maoa[4] to vang(-ship:velocity:surface, ship:up:vector). // 3 engines corrections
+                    set radius to 5.
+                } else {
+                    set fx to f[0]. // You slow down (13 engines)
+                }
             }
             else {set fx to f[1].} // You don't throttle so you just follow the trajectory
         } else {
-            if throttle > 0 and ship:verticalspeed <=-80 {
-                set maoa[4] to vang(-ship:velocity:surface, ship:up:vector). // [4] <==> Hoverslam
-                set fx to f[1]. // You're outside the radius so you throttle in direction of it
+            if throttle > 0 {
+                if ship:verticalspeed >=-80 {
+                    set maoa[4] to vang(-ship:velocity:surface, ship:up:vector). //  3 engines corrections
+                    set radius to 5.
+                } else {
+                    set fx to f[1]. // You're outside the radius so you throttle in direction of it
+                }
             } 
             else {set fx to f[0].} // You're outside but you don't throttle : you break to guide your trajectory into it
         }
