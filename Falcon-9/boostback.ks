@@ -55,11 +55,11 @@ lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472.
 
         //--Steering -------------------------------------------|
 
-        if launchpos:lat - landingsite:lat >0 {
+        if launchpos:lat - landingsite:lat >0.0015 {
             lock steering to heading (landingsite:heading+ang, tilt).
-        } else if launchpos:lat - landingsite:lat <0{
+        } else if launchpos:lat - landingsite:lat <0.0015{
             lock steering to heading (landingsite:heading-ang, tilt).
-        } else if launchpos:lat - landingsite:lat =0 {
+        } else {
             lock steering to heading (landingsite:heading, tilt).
         }
 
