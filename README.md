@@ -1,6 +1,6 @@
 I highly recommend using Visual studio code for reading.
 # Codes : 
- - Mechazilla : 99%
+ - Mechazilla : 99% (I haven't tested yet the new version)
 # Boosters :
  - Landing : 90 % (F9) 70% (SH)
  - Boostback : 100%, If you encouter an error : leave a comment on the ytb video you found my code please
@@ -26,7 +26,7 @@ I highly recommend using Visual studio code for reading.
 
 # TO-DO (In order)
 - Fix boostback for droneship landing and superheavy RTLS ✅(15/10)
-- Fix superheavy AoAs to land in water at wanted pos (Before november)
+- Fix superheavy AoAs to land in water at wanted pos ✅(15-20/10)
 - Program superheavy steering and throttle to land precisely, while cancelling horizontalspeed (before december)
 - Fix fuel level during boostback and for landing (Before january) 
 - Put starship in orbit / IFT-like trajectory (Before january)
