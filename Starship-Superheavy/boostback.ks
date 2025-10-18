@@ -1,35 +1,6 @@
-set distance to 150000.
-function ld {
-SET kuniverse:defaultloaddistance:flying:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:flying:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:flying:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:flying:PACK TO distance.   
-SET kuniverse:defaultloaddistance:escaping:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:escaping:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:escaping:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:escaping:PACK TO distance.   
-SET kuniverse:defaultloaddistance:SUBORBITAL:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:SUBORBITAL:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:SUBORBITAL:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:SUBORBITAL:PACK TO distance.   
-SET kuniverse:defaultloaddistance:ORBIT:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:ORBIT:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:ORBIT:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:ORBIT:PACK TO distance.   
-SET kuniverse:defaultloaddistance:prelaunch:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:prelaunch:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:prelaunch:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:prelaunch:PACK TO distance.   
-SET kuniverse:defaultloaddistance:landed:LOAD TO distance.   
-SET kuniverse:defaultloaddistance:landed:UNLOAD TO distance. 
-SET kuniverse:defaultloaddistance:landed:UNPACK TO distance. 
-SET kuniverse:defaultloaddistance:landed:PACK TO distance.   
-}
-ld().
 //--Variables--\\
 
-//OLTC28.637138460196,-80.6050788442709
-set meco to 72500. // Boostback start altitude.
+set meco to 70000. // Boostback start altitude.
 set maxalt to 100000. //max alt you want the apoapsis of the boostback to go to : W.I.P.
 set launchpos to latlng(28.6367249957965,-80.6050180698562). // launchsite position
 lock landingsite to latlng(28.6367249957965,-80.6050180698562). // latlng coordinates of your desired landingsite
@@ -54,7 +25,7 @@ function errorVector {
     return  landingsite:position - getImpact():position.
 }
 
-//----------------------------------------------------------------------------------BOOSTBACK CODE V1.2-------------------------------------------------------------------------------\\
+//----------------------------------------------------------------------------------BOOSTBACK CODE V2.0-------------------------------------------------------------------------------\\
 
 //--MECO SEQUENCE--\\
 
@@ -92,11 +63,11 @@ until lngoff > x and abs(latoff) < y or AG10 {
 
     //--Tilt--\\
     lock pr to t1:mag/maxalt.
-        if apoapsis>=maxalt {
-            lock tilt to -15.
-        } else {
-            lock tilt to 5.
-        }
+    if apoapsis>=maxalt {
+        lock tilt to -15.
+    } else {
+        lock tilt to 5.
+    }
     //--Steering--\\
     if launchpos:lng - landingsite:lng < 0 {
         set k to -1.
@@ -106,13 +77,10 @@ until lngoff > x and abs(latoff) < y or AG10 {
 
     if getimpact():lng - landingsite:lng >0.001 and getimpact():lat - landingsite:lat >0.001 {
         lock steering to heading(k*landingsite:heading-ang, tilt).
-        print("1").
     } else if getimpact():lng - landingsite:lng <-0.001 and getimpact():lat - landingsite:lat <-0.001 {
         lock steering to heading(k*landingsite:heading+ang, tilt).
-        print("2").
     } else{
         lock steering to heading(k*landingsite:heading,tilt).
-        print("3").
     }
     //--Fuel--\\
     if ag6 {
