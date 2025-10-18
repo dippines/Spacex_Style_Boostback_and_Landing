@@ -75,10 +75,10 @@ until lngoff > x and abs(latoff) < y or AG10 {
         set k to 1.
     }
     if abs(getimpact():lng) - abs(landingsite:lng) > 0 {
-        lock steering to heading(k*landingsite:heading+ang, tilt).
+        lock steering to heading(k*landingsite:heading-ang, tilt).
         print("1").
     } else if abs(getimpact():lng) - abs(landingsite:lng) <0 {
-        lock steering to heading(k*landingsite:heading-ang, tilt).
+        lock steering to heading(k*landingsite:heading+ang, tilt).
         print("2").
     } else{
         lock steering to heading(k*landingsite:heading,tilt).
@@ -94,4 +94,5 @@ until lngoff > x and abs(latoff) < y or AG10 {
     lock throttle to abs(min(max(bbt,0.05),1))*pr.
 wait 0.1.
 }
+
 
