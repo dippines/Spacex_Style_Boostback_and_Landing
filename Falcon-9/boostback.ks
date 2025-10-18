@@ -60,10 +60,10 @@ until lngoff > 5 and abs(latoff) < 5 or ABORT { // 5 is a very precise value, th
 
         }
         if abs(getimpact():lng) - abs(landingsite:lng) > 0 {
-            lock steering to heading(k*landingsite:heading+ang, tilt).
+            lock steering to heading(k*landingsite:heading-ang, tilt).
 
         } else if abs(getimpact():lng) - abs(landingsite:lng) <0 {
-            lock steering to heading(k*landingsite:heading-ang, tilt).
+            lock steering to heading(k*landingsite:heading+ang, tilt).
 
         } else{
             lock steering to heading(k*landingsite:heading,tilt).
