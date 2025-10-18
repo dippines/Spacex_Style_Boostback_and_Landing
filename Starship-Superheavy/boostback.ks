@@ -69,18 +69,20 @@ until lngoff > x and abs(latoff) < y or AG10 {
         lock tilt to 5.
     }
     //--Steering--\\
-    if launchpos:lng - landingsite:lng < 0 {
+    if abs(launchpos:lat) - abs(landingsite:lat) > 0 {
         set k to -1.
     } else {
         set k to 1.
     }
-
-    if getimpact():lng - landingsite:lng >0.001 and getimpact():lat - landingsite:lat >0.001 {
-        lock steering to heading(k*landingsite:heading-ang, tilt).
-    } else if getimpact():lng - landingsite:lng <-0.001 and getimpact():lat - landingsite:lat <-0.001 {
+    if abs(getimpact():lng) - abs(landingsite:lng) > 0 {
         lock steering to heading(k*landingsite:heading+ang, tilt).
+        print("1").
+    } else if abs(getimpact():lng) - abs(landingsite:lng) <0 {
+        lock steering to heading(k*landingsite:heading-ang, tilt).
+        print("2").
     } else{
         lock steering to heading(k*landingsite:heading,tilt).
+        print("3").
     }
     //--Fuel--\\
     if ag6 {
@@ -92,3 +94,4 @@ until lngoff > x and abs(latoff) < y or AG10 {
     lock throttle to abs(min(max(bbt,0.05),1))*pr.
 wait 0.1.
 }
+
