@@ -54,18 +54,20 @@ lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472.
         }
 
         //--Steering -------------------------------------------|
-        if ship:geoposition:lat-landingsite:lat < 0 {
+        if abs(launchpos:lat) - abs(landingsite:lat) > 0 {
             set k to -1.
         } else {
-            set k to 1.
-        }
 
-        if getimpact():lng - landingsite:lng >0.001 and getimpact():lat - landingsite:lat >0.001 {
-            lock steering to heading(k*landingsite:heading-ang, tilt).
-        } else if getimpact():lng - landingsite:lng <-0.001 and getimpact():lat - landingsite:lat <-0.001 {
+        }
+        if abs(getimpact():lng) - abs(landingsite:lng) > 0 {
             lock steering to heading(k*landingsite:heading+ang, tilt).
+
+        } else if abs(getimpact():lng) - abs(landingsite:lng) <0 {
+            lock steering to heading(k*landingsite:heading-ang, tilt).
+
         } else{
             lock steering to heading(k*landingsite:heading,tilt).
+
         }
         //--Throttle------------------------------|
 
