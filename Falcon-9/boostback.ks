@@ -60,19 +60,19 @@ lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472.
             set k to 1.
         }
 
-        if launchpos:lng - landingsite:lng >0.001 {
-            lock steering to heading(k*landingsite:heading+ang, tilt).
-        } else if launchpos:lng - landingsite:lng <-0.001 {
+        if getimpact():lng - landingsite:lng >0.001 and getimpact():lat - landingsite:lat >0.001 {
             lock steering to heading(k*landingsite:heading-ang, tilt).
+        } else if getimpact():lng - landingsite:lng <-0.001 and getimpact():lat - landingsite:lat <-0.001 {
+            lock steering to heading(k*landingsite:heading+ang, tilt).
         } else{
-            lock steering to heading(k*landingsite:heading, tilt).
+            lock steering to heading(k*landingsite:heading,tilt).
         }
         //--Throttle------------------------------|
 
         lock bbt to errorVector():mag/t1:mag.
         lock throttle to abs(min(max(bbt,0.1),1))*pr.
-    wait 0.1.}
+    wait 0.1.
+}
 lock throttle to 0.
 unlock throttle.
 run land.
-
