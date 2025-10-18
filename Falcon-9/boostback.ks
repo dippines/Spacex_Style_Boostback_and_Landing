@@ -40,7 +40,7 @@ lock lngoff to (landingsite:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472.
 lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472. 
 
 
-    until lngoff > 5 and abs(latoff) < 5 or ABORT { // 5 is a very precise value, that work for me what I would recommend is to start with 50-100 values and decrease ESPECIALLY for lngoff.
+until lngoff > 5 and abs(latoff) < 5 or ABORT { // 5 is a very precise value, that work for me what I would recommend is to start with 50-100 values and decrease ESPECIALLY for lngoff.
 
         lock corr to VXCL(ship:sensors:grav,landingsite:position-ship:position). // straight vec from you to landingpos, on the same plan as errorvec.
         lock ang to VANG(corr, errorVector()).// Angle between the corr and errorvec, you want this to be the nearest to 0 
