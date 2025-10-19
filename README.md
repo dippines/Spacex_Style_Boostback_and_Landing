@@ -3,7 +3,7 @@ I highly recommend using Visual studio code for reading.
  - Mechazilla : 100%
 # Boosters :
  - Landing : 90 % (F9) 95% (SH)
- - Boostback : 90% (Still some bugs when RTLS)
+ - Boostback : 90% (Still ~-1km lat precise when rtls so i'll try to fix it soon)
 # Starship :
  - Landing : 0%
  - Orbit : 0%
