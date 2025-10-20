@@ -1,49 +1,26 @@
-// STILL A W.I.P.
-
-
 //------------------------Variables------------------------\\
 
-//------------Lists------------\\
-set alts to list(50000,25000,13500,5000,20). // The stages of your flight. Feel free to change
+//--Lists---\\
+set alts to list(50000,25000,13500,3000,0). // The stages of your flight. Feel free to change
 set f to list(-1,1). // Factor for the angle of attack (aoa)
-set maoa to list(4,7,8,3,2). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
-set radius to 50.
+set maoa to list(2,3,6,3,2). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
+//--Constants--\\
+set radius to 15.
+set sd to 500. 
+
+
 //------------Target------------\\
+
 if hastarget { 
     set landingsite to latlng(target:geoposition:lat, target:geoposition:lng).
 } else {
-    set landingsite to latlng(28.6367249957965,-80.6050180698562). // Your landingsite position
+    set landingsite to latlng(28.6358695682399,-80.6013546763036). // Your landingsite position
 }
-
 
 //------------------------Functions------------------------\\
 
-//------------Throttle------------\\
 
-function fnthrot {
-    parameter targetSpeed.
-lock g to constant:g * body:mass / body:radius^2.
-lock gravityForce to ship:mass * g.
-lock speedError to targetSpeed - ship:verticalspeed.
-lock throttleAdjustment to (speedError * ship:mass) / (ship:availablethrust + gravityForce).
-lock ApproachThrottle to throttleAdjustment.
-return ApproachThrottle. // Gives a throttle that fixes you at a certain speed (not to mistake with hovering)
-}
-
-//------------Error vector------------\\
-function errorVector {   
-    return landingsite:position - getImpact():position.
-}
-
-//------------GetImpact------------\\
-function getImpact {
-    if addons:tr:hasimpact { 
-    return addons:tr:impactpos. 
-    }
-return ship:geoposition.
-}
-
-//------------AoA------------\\
+//--AoA--\\
 
 function i {
     if alt:radar > alts[0] {
@@ -60,37 +37,56 @@ function i {
 }
 
 function fdynaoax { 
-    local errorVector is getimpact():position - landingsite:position.
-    local H1 is abs(errorVector:mag).
-    lock rx to i().
+    set H1 to errorVector():mag.
+    set rx to i().
     if alts[rx] <= alt:radar {
         if H1 < radius {
             if throttle > 0{
-                if ship:verticalspeed >=-35 {
+                if getimpact():lng-landingsite:lng <0 {
                     set maoa[4] to vang(-ship:velocity:surface, ship:up:vector).
                     set fx to f[0].
                 } else {
-                    set fx to f[1].
+                    set fx to f[0].
                 }
             }
             else {set fx to f[1].}
-        } else {
+        
+        } else if H1 > radius{
             if throttle > 0 {
                 if ship:verticalspeed >=-80 {
-                    set maoa[4] to 14.
-                    set fx to f[1].
+                    if getimpact():lng-landingsite:lng >0 {
+                        set maoa[4] to 100-vang(errorvector()+ship:up:vector,ship:up:vector).
+                        set fx to f[1].
+                    } else { set maoa[4] to 2.
+                        set fx to f[0].}
                 } else {
                     set fx to f[1].
                 }
             } 
             else {set fx to f[0].}
+        
+        } else {
+            if alt:radar >= 900 {
+            set maoa[rx] to 0.
+            set fx to f[1].
+            }    
         }
         set maxaoa to maoa[rx]*fx.
         return maxaoa.
     }
 }
 
-//------------Steering------------\\
+//--Steering--\\
+function getImpact {
+    if addons:tr:hasimpact { 
+    return addons:tr:impactpos. 
+    }
+return ship:geoposition.
+}
+
+function errorVector {   
+    return landingsite:position - getImpact():position.
+}
 
 function getSteering {
     local velVector is -ship:velocity:surface.
@@ -103,25 +99,44 @@ function getSteering {
     }
     
     lock steer to lookdirup(result, facing:topvector).
-    // rcsx().
-    // return val.
-    if alt:radar <=900 {set val to R(ship:up:pitch, steer:yaw,270).}
-    else {set val to R(steer:pitch,steer:yaw,270).}
-
+    if alt:radar <=900 {
+        set val to R(ship:up:pitch, steer:yaw,270).}
+    else {
+        set val to R(steer:pitch,steer:yaw,270).}
 
     return val.
 }
 
-//function rcsx {
-//    lock latoff to (landingsite:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472.  
-//        if latoff > 0 {set z to 1.} 
-//        else {set z to -1.}
-//
-//    set ship:control:starboard to min(max(z,0),1).
-//    print("sbtest...."+latoff).
-//
-//}
-//------------Mechazilla------------\\
+//--Throttle--\\
+
+function throt { // W.I.P.
+    lock steering to getSteering().
+    wait until alt:radar <=1500.
+    mechazilla().
+    if abs(ship:verticalspeed) > 400 {
+        lock throttle to min(max(sd/(alt:radar-39.94),0.7),1).
+    } else {
+        lock throttle to min(max(sd/(alt:radar-39.94),0.4),1).
+    }
+    
+    wait until ship:verticalspeed >=-80.
+    set radius to 15.
+    toggle ag1.
+    until false {
+        if getimpact():lng-landingsite:lng >0 {
+            lock throttle to 0.8.
+        } else if getimpact():lng-landingsite:lng <0 or ship:verticalspeed >=-35{
+            lock throttle to min(max(100/alt:radar,0),0.7). // THIS DONT WORK FOR NOW
+            if alt:radar <=200 {lock steering to R(ship:up:pitch,ship:up:yaw,270).}
+        }  
+        if ship:verticalspeed >=0 {
+             lock throttle to 0.
+        }
+       wait .05.
+    }
+}
+
+//--Mechazilla--\\
 function mechazilla {
 
     SET MESSAGE TO "Connecting Mechazilla and booster".
@@ -132,35 +147,9 @@ function mechazilla {
     
 }
 
-//------------------------LANDING------------------------\\
+//--Main--\\
 
-function final{
-    if ship:verticalspeed <=-300 {
-        set sd to 500. // you want to be stop at 400m
-        lock throttle to min(max(sd/(alt:radar-39.94),0),1).
-        lock steering to getSteering().
-        mechazilla().
-        wait until ship:verticalspeed >=-80.
-        set radius to 1.
-        toggle ag1.
-        lock throttle to fnthrot(-12).
-        lock steering to getSteering().
-        wait until alt:radar <=200.
-        lock steering to R(ship:up:pitch,ship:up:yaw,270).
-    }
-}
-
-
-toggle ag3. // Gridfins
-wait until ship:verticalspeed <0. // When you start the descent
-lock steering to srfRetrograde. // You lock steering to retrograde
-Brakes on. // And open gridfins
-SAS OFF.
-RCS ON.
-wait until alt:radar <=80000. // Until you enter atmosphere
-set radius to 20.
-lock steering to getsteering(). // And you start correcting your trajectory
-wait until alt:radar <=1000.
-set radius to 10.
-final().
+wait until ship:verticalspeed <0.
+lock steering to getsteering().
+throt().
 wait until ag10. // To end just press ag10.
