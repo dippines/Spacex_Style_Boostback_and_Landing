@@ -2,7 +2,7 @@ I highly recommend using Visual studio code for reading.
 # Codes : 
 # Starship-Superheavy :
  - Mechazilla : 100%
- - Booster landing : 90 %
+ - Booster landing : 95 % (Some latitude errors because of the booster angle + throttle values)
  - Booster Boostback : 90% (Still ~-1km lat precise when rtls so i'll try to fix it soon)
  - Ship landing : 0%
  - Orbit : 0%
