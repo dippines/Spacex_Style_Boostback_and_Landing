@@ -4,7 +4,7 @@
 
 set alts to list(50000,25000,13500,3000,0). // The stages of your flight. Feel free to change
 set f to list(-1,1). // Factor for the angle of attack (aoa)
-set maoa to list(2,3,5,2,2). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
+set maoa to list(2,3,5,2,4). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
 
 //--Constants--\\
 
@@ -19,7 +19,7 @@ set altoffset to 39.94.
 if hastarget { 
     set landingsite to latlng(target:geoposition:lat, target:geoposition:lng).
 } else {
-    set landingsite to latlng(28.6358695682399,-80.6013546763036). // Your landingsite position
+    set landingsite to latlng(28.6358695682399,-80.6013656763036). // Your landingsite position
 }
 
 //--------Functions--------\\
@@ -47,35 +47,35 @@ function fdynaoax {
     if alts[rx] <= alt:radar {
         if H1 < radius {
             if throttle > 0 {
-                if getimpact():lng-landingsite:lng < 0 {
+                if ship:geoposition:lng-landingsite:lng < 0 {
                     set maoa[4] to 0.
                     set fx to f[0].
                 } 
                 else {
-                    set maoa[4] to 2.
+                    set maoa[4] to 4.
                     set fx to f[0].
                 }
             }
             else {
-                set maoa[4] to 2.
+                set maoa[4] to 4.
                 set fx to f[1].
             }
         } else if H1 > radius {
             if throttle > 0 {
                 if ship:verticalspeed >=-80 {
-                    if getimpact():lng-landingsite:lng >0 {
+                    if ship:geoposition:lng-landingsite:lng >0 {
                         set maoa[4] to 90-vang(errorvector()+ship:up:vector,ship:up:vector).
                         set fx to f[1].
                     } else { 
                         set maoa[4] to 0.
                     }
                 } else {
-                    set maoa[4] to 2.
+                    set maoa[4] to 4.
                     set fx to f[1].
                 }
             } 
             else {
-                set maoa[4] to 2.
+                set maoa[4] to 4.
                 set fx to f[0].
             }
         
@@ -144,7 +144,7 @@ wait until alt:radar <= abs(ship:verticalspeed*3).
     set radius to 3.
     set mn to 0.	
     lock throttle to min(max((ship:verticalspeed^2)/(2*9.81*(alt:radar-sd)),mn),1).
-        if alt:radar <=200 or ship:verticalspeed >= -35 or H1<=radius{
+        if alt:radar <=200 or ship:verticalspeed >= -20 or H1<=radius{
             lock steering to R(ship:up:pitch,ship:up:yaw,270).
         }
         if ship:verticalspeed >=0 {
