@@ -2,7 +2,7 @@
 
 set meco to 72500. // Boostback start altitude.
 set maxalt to 100000. //max alt you want the apoapsis of the boostback to go to : W.I.P.
-lock landingsite to latlng(28.6367249957965,-80.6050180698562). // latlng coordinates of your desired landingsite
+lock landingsite to latlng(28.6358695682399,-80.6013546763036). // latlng coordinates of your desired landingsite
 
 //--Functions--\\
 
@@ -55,7 +55,9 @@ set y to 100. // beware because y act like a clamp, As superheavy is more uncont
 
 lock lngoff to (landingsite:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472. 
 lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472. 
-
+toggle ag3. // Gridfins
+RCS on.
+SAS OFF.
 until lngoff > x and abs(latoff) < y or AG10 {    
     //--Tilt--\\
     lock pr to t1:mag/maxalt.
@@ -65,11 +67,16 @@ until lngoff > x and abs(latoff) < y or AG10 {
         lock tilt to 5.
     }
 
-    clearVecDraws().
     //--Steering--\\
     set corr to VXCL(ship:sensors:grav,landingsite:position-ship:position). // straight vec from you to landingpos, on the same plan as errorvec.
     set t to VXCL(ship:sensors:grav,(ship:direction:STARVECTOR)*latoff).
-    set nv to corr+5*t.  
+    if lngoff <=5000 {
+        set nv to corr+8*t.
+    } else {
+        set nv to corr+5*t.
+    }
+  
+    
     if abs(ship:geoposition:lng) - abs(landingsite:lng) > 0 {
         set k to -1.
     } else {
@@ -80,13 +87,13 @@ until lngoff > x and abs(latoff) < y or AG10 {
     } else {
         set ang to -1*vang(corr, nv).
     }
-    
+
     lock steering to heading(k*landingsite:heading+ang, tilt).
     
     //--Fuel--\\
     //when vang(ship:velocity:surface, ship:facing:forevector) <=15 then {
-    //when ship:liquidfuel >=10000 then {ag7 on.}
-    //when ship:liquidfuel <=10000 then {ag8 on.}}
+     //when ship:liquidfuel >=10000 then {ag7 on.}
+     //when ship:liquidfuel <=10000 then {ag8 on.}}
     
     //--Throttle--\\
     lock bbt to errorVector():mag/t1:mag.
