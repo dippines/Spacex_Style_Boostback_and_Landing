@@ -4,7 +4,7 @@ set sh to "Heavy Booster".
 // set s to "Starship".
 until false {
   WHEN NOT SHIP:MESSAGES:EMPTY then {
-    until vessel(sh):altitude <=350 {
+    until vessel(sh):altitude <=240 {
         angle().
     }
     ag1 on. // Close arms
@@ -18,9 +18,8 @@ function angle {  // Target angle
   lock v1 to vxcl(up:vector, vessel(sh):position).
   lock ang to vang(v1,v0)-90.
   lock mDist to (v1 - vxcl(up:vector, SHIP:geoposition:position)):mag.
-  if mdist <20 {
-    ag1 on.
+  if mdist <=40 {
+    toggle ag1.
   }
   MZANG:setfield("target angle",ang).
-  print("Catching at "+ang+"angle").
 }
