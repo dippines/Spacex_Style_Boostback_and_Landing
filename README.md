@@ -29,6 +29,6 @@ I highly recommend using Visual studio code for reading.
 # TO-DO (In order)
 - Fix boostback for droneship landing and superheavy RTLS ✅(15-19/10/2025) V3.0
 - Fix fuel level during boostback and for landing (15-18/10/2025)✅ V1.0
-- Clean-up the codes (better automatization of boostback, more readable landing code) (In october/november)  
-- Put starship in orbit / IFT-like trajectory (11/2025)
-- Starship precise position landing code (October/November/December)
+- Clean-up the codes (better automatization of boostback, more readable landing code) (Around december)  
+- Put starship in orbit / IFT-like trajectory (12/2025)
+- Starship precise position landing code (Around December)
