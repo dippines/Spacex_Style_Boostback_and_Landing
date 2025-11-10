@@ -1,7 +1,6 @@
 clearscreen.
 
 // PUT THIS IN BOOT FOLDER
-// IN THE VAB CLICK ON THE KOS ICON
 // AND MAKE THE TOWER RUN THIS CODE AT LAUNCH
 
 
@@ -12,22 +11,20 @@ set sh to "Heavy Booster".
 // set s to "Starship".
 
 //--Main--\\
-print "Waiting for Booster Signal acquisition".
 
 until false {
-  WHEN NOT SHIP:MESSAGES:EMPTY then {
-      until vessel(sh):altitude <=130{
-          set v1 to vxcl(up:vector, vessel(sh):position).
-          set Mechazilla to ship:partsnamed("SLE.SS.OLIT.MZ")[0].
-          set MZANG to Mechazilla:getmodule("ModuleSLEController").
-          set v0 to -ship:prograde:starvector.
-          set ang to vang(v1,v0)-90.
-      MZANG:setfield("target angle",ang).
-      if vessel(sh):altitude <= 300 {
-      ag1 on.} // Start closing arms
-        wait 0.05.
-      }
-    
-  }  
-  wait 0.05.
+  set v1 to vxcl(up:vector, vessel(sh):position).
+  set Mechazilla to ship:partsnamed("SLE.SS.OLIT.MZ")[0]. 
+  set MZ to Mechazilla:getmodule("ModuleSLEController"). 
+  set v0 to -ship:prograde:starvector. 
+  set ang to vang(v1,v0)-90. 
+  set startalt to 1000. // Approximate vessel throttle start
+  MZ:setfield("target angle",ang). // Where does the arms need to point
+  set closang to vessel(sh):altitude*113.5/startalt.// Cross product to determine the angle that arms need to be opened (113.5 being the max when vessel at 1km)
+  if closang <=30 { // If the vessel close
+   ag1 on. // Close arms
+  } else { 
+    MZ:setfield("arms open angle",closang).
+  }
+wait 0.5.
 }
