@@ -2,12 +2,12 @@ I highly recommend using Visual studio code for reading.
 # Codes : 
 # Starship-Superheavy :
  - Mechazilla : 100%
- - Booster landing : 95 % (Some latitude errors because of the booster angle + throttle values)
- - Booster Boostback : 90% (Still ~-1km lat precise when rtls so i'll try to fix it soon)
+ - Booster landing : 90 %
+ - Booster Boostback : 80%
  - Ship landing : 0%
  - Orbit : 0%
 # Falcon-9 :
- - Boostback : 90%
+ - Boostback : 80%
  - Booster landing : 85%
 
  # Dependencies :
@@ -17,11 +17,8 @@ I highly recommend using Visual studio code for reading.
  - kOS
  - Tundra Exploration
 
-
 # Optional :
-- Starship Ground Expansion
-- Fuel Vent
-- Vent Mod 
+- Starship Ground Expansion 
 - RSS
 - OCISLY (cam previews)
 
