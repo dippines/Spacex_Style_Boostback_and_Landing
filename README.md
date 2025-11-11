@@ -8,7 +8,7 @@ I highly recommend using Visual studio code for reading.
  - Orbit : 0%
 # Falcon-9 :
  - Boostback : 80%
- - Booster landing : 85%
+ - Booster landing : 99%
 
  # Dependencies :
  - Starship Launch Expansion 
@@ -24,7 +24,7 @@ I highly recommend using Visual studio code for reading.
 
 
 # TO-DO (In order)
-- Fix fuel level during boostback and for landing (15-18/10/2025) V1.0
-- Clean-up the codes (better automatization of boostback, more readable landing code) (Around december)  
-- Put starship in orbit / IFT-like trajectory (12/2025)
-- Starship precise position landing code (Around December)
+- Fix fuel level during boostback and for landing (15-18/10/2025) V1.0 (Superheavy needs to be around 10000 and Falcon 9 around 1000)
+- Put starship in orbit / IFT-like trajectory (Starting around december)
+- Starship precise position landing code (Starting around december)
+- Clean-up the codes (more readable codes) (once codes are finished) 
