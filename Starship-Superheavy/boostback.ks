@@ -1,13 +1,12 @@
-
 //--Variables--\\
 
-set meco to 72500. // Boostback start altitude.
+set meco to 70000. // Boostback start altitude.
 set maxalt to 100000. //max alt you want the apoapsis of the boostback to go to : W.I.P.
-lock landingsite to latlng(28.6358695682399,-80.6013546763036). // latlng coordinates of your desired landingsite
-
+lock landingsite to latlng(25.9956786506544,-97.153023799664). // latlng coordinates of your desired landingsite
 //--Functions--\\
 
 //--GetImpact--\\
+
 function getImpact {
     if addons:tr:hasimpact { 
     return addons:tr:impactpos. 
@@ -16,28 +15,41 @@ return ship:geoposition.
 }
 
 //--Target--\\
+
 if hastarget { 
     lock landingsite to latlng(target:geoposition:lat, target:geoposition:lng). // latlng in case you have a target set
 }
 
 //--Error vector--\\
+
 function errorVector {   
     return  landingsite:position - getImpact():position.
 }
 
-//----------------------------------------------------------------------------------BOOSTBACK CODE V1.2-------------------------------------------------------------------------------\\
+function rcorrs {
+    set lp2 to getimpact():lat-landingsite:lat. 
+    if lp2 >0 {
+        set SHIP:CONTROL:STARBOARD to 1.
+    } else {
+        set SHIP:CONTROL:STARBOARD to -1.
+    }
+
+}
+//----------------------------------------------------------------------------------BOOSTBACK-------------------------------------------------------------------------------\\
 
 //--MECO SEQUENCE--\\
 
-when alt:radar >=65000 then {
+when alt:radar >=meco-5000 then {
   toggle ag1.
   lock throttle to 1.
 }
-when alt:radar >=67000 then {
+
+when alt:radar >=meco-2500 then {
   toggle ag1.
   lock throttle to 1.
 }
-when alt:radar >=69500 then {
+
+when alt:radar >=meco-500 then {
   lock steering to srfprograde.
   lock throttle to 0.1.
   stage.
@@ -59,9 +71,13 @@ lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472.
 toggle ag3. // Gridfins
 RCS on.
 SAS OFF.
+
 until lngoff > x and abs(latoff) < y or AG10 {    
+    rcorrs().
     //--Tilt--\\
+
     lock pr to t1:mag/maxalt.
+
     if apoapsis>=maxalt {
         lock tilt to -15.
     } else {
@@ -69,19 +85,20 @@ until lngoff > x and abs(latoff) < y or AG10 {
     }
 
     //--Steering--\\
+
     set corr to VXCL(ship:sensors:grav,landingsite:position-ship:position). // straight vec from you to landingpos, on the same plan as errorvec.
     set t to VXCL(ship:sensors:grav,(ship:direction:STARVECTOR)*latoff).
-    if lngoff <=5000 {
+
+    if abs(lngoff) <=5000 {
         set nv to corr+10*t.
     } else {
         set nv to corr+5*t.
     }
-  
-    
-    if abs(ship:geoposition:lng) - abs(landingsite:lng) > 0 {
-        set k to -1.
-    } else {
+
+    if abs(getImpact():lng) - abs(landingsite:lng) > 0 {
         set k to 1.
+    } else {
+        set k to -1.
     }
     if abs(getimpact():lat) - abs(landingsite:lat) < 0 {
         set ang to 1*vang(corr, nv).
@@ -90,14 +107,21 @@ until lngoff > x and abs(latoff) < y or AG10 {
     }
 
     lock steering to heading(k*landingsite:heading+ang, tilt).
-    print(vang(ship:velocity:surface,ship:facing:forevector)).
+
     //--Fuel--\\
-    //when vang(ship:velocity:surface, ship:facing:forevector) <=15 then {
+
+    //if vang(ship:velocity:surface, ship:facing:forevector) <=15 {
      //when ship:liquidfuel >=10000 then {ag7 on.}
      //when ship:liquidfuel <=10000 then {ag8 on.}}
     
     //--Throttle--\\
+    
     lock bbt to errorVector():mag/t1:mag.
+    
     lock throttle to abs(min(max(bbt,0.05),1))*pr.
+
 wait 0.1.
 }
+set ship:control:starboard to 0.
+lock throttle to 0.
+toggle ag5.
