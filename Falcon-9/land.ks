@@ -1,51 +1,30 @@
-// The falcon-9 variant of my landing code.
-// What you should change to adapt it to you : 
-// - Landingsites positions
-// - k value in startalt()
-// The code still have many flaws, but will sure get you on point
 
 //------------------------Variables------------------------\\
 
 //------------Lists------------\\
-set alts to list(50000,25000,13500,5000,20). // The stages of your flight. Feel free to change
+set alts to list(100000,25000,10000,5000,0). // The stages of your flight. Feel free to change
 set f to list(-1,1). // Factor for the angle of attack (aoa)
 set maoa to list(3,4,5,3,2). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
-
+//--Constants--\\
+set boosteroffset to 31.
+set radius to 10.
+set nextengheight to 1000. 
+set done_ag1 to false.
 //------------Target------------\\
-//set LZ1 to latlng(28.6083884601472,-80.6497481659008).
+set LZ1 to latlng(28.4857625502468,-80.5429426267221).
+//set LZ2 to latlng(28.4877484442497,-80.5449202044373).
+//set LZ3 to latlng().
 //set OCISLY to latlng(28.6356819213369,-79.4865254914434)
 
 if hastarget { 
     set landingsite to latlng(target:geoposition:lat, target:geoposition:lng).
 } else {
-    set landingsite to latlng(28.4971749954165,-80.5349879288904). // Your landingsite position
+    set landingsite to LZ1. // Your landingsite position
 }
 
 
 //------------------------Functions------------------------\\
 
-//------------Throttle------------\\
-
-function startalt {
-    lock v1 to ship:verticalSpeed/2. 
-    lock Fr to ship:maxthrust.
-    lock dm to ship:drymass.
-    lock M to (ship:mass+dm)/2. 
-    lock g to constant:g * body:mass / body:radius^2.		
-    lock n to 0.95. // Expected throttle
-    lock k to 1.27. // Adapt this to you the greater it is, the lower your h will be 
-    lock h to (v1^2)/(k*(n*(Fr/M)-g)).
-    return h.
-}
-
-function fnthrot {
-    parameter targetSpeed.
-lock gravityForce to ship:mass * g.
-lock speedError to targetSpeed - ship:verticalspeed.
-lock throttleAdjustment to (speedError * ship:mass) / (ship:availablethrust + gravityForce).
-lock ApproachThrottle to throttleAdjustment.
-return ApproachThrottle. // Gives a throttle that fixes you at a certain speed (not to mistake with hovering)
-}
 
 //------------Error vector------------\\
 function errorVector {   
@@ -76,29 +55,112 @@ function i {
     }
 }
 
-function fdynaoax { // /!\ I try to use common terms in here for you to understand better but the best thing is to run the code and see what you get.
-    local errorVector is getimpact():position - landingsite:position.
-    local H1 is errorVector:mag. // Scalar value of the error vector
-    lock rx to i().
-    if alts[rx] <= alt:radar { // <==> If you are in the range of the values in alts
-        if H1 < 8 { // If you're impact-pos is in a radius of 15m of landingsite
+function fdynaoax { 
+    global H1 is round(errorVector():mag).
+    set rx to i().
+    global H2 is getimpact():lng-landingsite:lng.
+    if alts[rx] <= alt:radar {
+        if H1 <= radius {
             if throttle > 0 {
-                set maoa[4] to vang(-ship:velocity:surface, ship:up:vector). // [4] <==> Hoverslam
-                set fx to f[0]. // You break
+            set maoa[4] to vang(-ship:velocity:surface,ship:up:vector).
+                if ship:verticalspeed >=-100 {
+                    if H2>0 {
+                        set fx to f[0].
+                    }
+                    else {
+                    set fx to f[1].
+                    }
+                
+                // print("0,0,0").
+                }
+            } else {
+                set fx to f[1].
+                // print("0,0").
             }
-            else {set fx to f[1].} // You don't throttle so you just follow the trajectory
         } else {
             if throttle > 0 {
-                set maoa[4] to vang(-ship:velocity:surface, ship:up:vector). // [4] <==> Hoverslam
-                set fx to f[1]. // You're outside the radius so you throttle in direction of it
-            } 
-            else {set fx to f[0].} // You're outside but you don't throttle : you break to guide your trajectory into it
+                if ship:verticalspeed >=-100 {
+                    if H2>0 and H1>=4*radius{
+                        set atmfac to alt:radar/nextengheight.
+                        set maoa[4] to max(min(atmfac*(95-vang(errorvector()+ship:up:vector,ship:up:vector)),5),1).
+                        set fx to f[1].
+                        // print("1,0,0,0").
+                    } 
+                    if H2 <0 and H1 >= 2*radius{
+                        set fx to f[0].
+                        set maoa[4] to 4.
+                        // print("1,0,0,1").
+                    }
+                } else {
+                    set fx to f[1].
+                    set maoa[4] to vang(-ship:velocity:surface,ship:up:vector).
+                    // print("1,0,1").
+                }
+            }
+            else {
+               set fx to f[0].
+                // print("1,1").
+            }
+        
         }
-        set maxaoa to maoa[rx]*fx. // The value of the aoa is the corresponding maoa value of alts (by index) * the factor
+        set maxaoa to maoa[rx]*fx.
+        // print("H1___:"+ H1).
         return maxaoa.
     }
 }
 
+function rcorrs {
+    if (270-ship:facing:roll) <= 45 and alt:radar <=alts[0] {
+        
+        if alt:radar <=300 {
+            set lp1 to ship:geoposition:lng-landingsite:lng.
+            set lp2 to ship:geoposition:lng-landingsite:lng.
+        } else {
+            set lp1 to getimpact():lng-landingsite:lng.
+            set lp2 to getimpact():lat-landingsite:lat. 
+        }
+        
+        if lp1 >0 {
+            set SHIP:CONTROL:TOP to 1.
+        } else {
+            set SHIP:CONTROL:TOP to -1.
+        }
+        if lp2 >0 {
+            set SHIP:CONTROL:STARBOARD to 1.
+        } else {
+            set SHIP:CONTROL:STARBOARD to -1.
+        }
+        
+    }
+}
+
+
+function throt {
+wait until alt:radar <= alts[2].
+wait until alt:radar <= alts[3].
+    until ship:verticalspeed >=0 {
+    if ship:verticalspeed <=-100 {
+        set mn to 0.7.
+        lock throttle to min(max(nextengheight/(alt:radar),mn),1).
+    } else {
+        
+        if done_ag1 = false {
+            toggle ag1.
+            set radius to 5.
+            set done_ag1 to true.
+        }
+        if alt:radar <=100 {
+            lock steering to ship:up.
+            gear on.
+        }
+        lock factor to max(((H1+5)/radius),1).
+        lock throttle to min(max(factor*((ship:verticalspeed^2)/(2*9.81*(alt:radar-boosteroffset))),0),1).
+    }
+    wait 0.5.
+}
+    lock steering to ship:up.
+    lock throttle to 0.
+}
 //------------Steering------------\\
 
 function getSteering {
@@ -106,11 +168,19 @@ function getSteering {
     local correctionVector to errorVector().
     local result is velVector + correctionVector.
     local aoa is fdynaoax(). 
-
+    
     if vang(result, velVector) > aoa {
         set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
     }
-    lock val to lookdirup(result, facing:topvector).
+    
+    lock steer to lookdirup(result, facing:topvector).
+    rcorrs().
+    if ship:verticalspeed >= -100 {
+        set val to R((ship:up:pitch+steer:pitch)/2,steer:yaw,270).
+    }
+    else {
+        set val to steer.
+    }
     return val.
 }
 
@@ -127,15 +197,5 @@ RCS ON.
 wait until alt:radar <=80000. // Until you enter atmosphere
 lock steering to getsteering(). // And you start correcting your trajectory
 wait until alt:radar <= 20000.
-wait until ship:verticalspeed >= -1300.
-RCS on.
-set al to startalt().
-wait until altitude <= al.
-lock throttle to 1.
-wait until ship:verticalspeed >= -100.
-toggle ag1. // You skip to your last engine sequence
-lock throttle to fnthrot(-20).
-lock steering to up.
-wait until altitude <=300.
-lock throttle to fnthrot(-5).
+throt().
 wait until ag10. // To end just press ag10.
