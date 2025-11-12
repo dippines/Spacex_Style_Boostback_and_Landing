@@ -81,8 +81,7 @@ function fdynaoax {
             if throttle > 0 {
                 if ship:verticalspeed >=-100 {
                     if H2>0 and H1>=4*radius{
-                        set atmfac to alt:radar/nextengheight.
-                        set maoa[4] to max(min(atmfac*(95-vang(errorvector()+ship:up:vector,ship:up:vector)),5),1).
+                        set maoa[4] to max(min((95-vang(errorvector()+ship:up:vector,ship:up:vector)),5),1).
                         set fx to f[1].
                         // print("1,0,0,0").
                     } 
@@ -150,7 +149,11 @@ wait until alt:radar <= alts[3].
             set done_ag1 to true.
         }
         if alt:radar <=100 {
-            lock steering to ship:up.
+            LOCAL velVec IS ship:velocity:surface.
+            LOCAL upVec IS ship:up:vector:normalized.
+            LOCAL horizontalVelVec IS VXCL(upVec,velVec):normalized.
+            LOCAL finvec is -horizontalVelVec+5*upVec.
+            lock steering to finvec.
             gear on.
         }
         lock factor to max(((H1+5)/radius),1).
