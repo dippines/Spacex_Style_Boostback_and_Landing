@@ -71,8 +71,7 @@ function fdynaoax {
             if throttle > 0 {
                 if ship:verticalspeed >=-100 {
                     if H2>0 and H1>=10*radius{
-                        set atmfac to alt:radar/nextengheight.
-                        set maoa[4] to max(min(atmfac*(95-vang(errorvector()+ship:up:vector,ship:up:vector)),10),1).
+                        set maoa[4] to max(min((95-vang(errorvector()+ship:up:vector,ship:up:vector)),10),1).
                         set fx to f[1].
                         // print("1,0,0,0").
                     } 
@@ -154,10 +153,11 @@ function getSteering {
 
 function throt {
 wait until alt:radar <= alts[3].
-wait until alt:radar <=abs(ship:verticalspeed*3) or alt:radar <=1000.
+lock startdist to max(abs(ship:verticalspeed*3),1000).
+wait until alt:radar <= startdist.
     until ship:verticalspeed >=0 {
     if ship:verticalspeed <=-100 {
-        if abs(ship:verticalspeed) > 300 {
+        if ship:verticalspeed <= -300 {
             set mn to 1.
         } else {
             set mn to 0.5.
@@ -180,7 +180,7 @@ wait until alt:radar <=abs(ship:verticalspeed*3) or alt:radar <=1000.
         }
         lock throttle to min(max(((ship:verticalspeed^2)/(2*9.81*(alt:radar-armsheight))),0),1).
     }
-    wait 0.5.
+    wait 0.2.
 }
 lock throttle to 0.
 }
