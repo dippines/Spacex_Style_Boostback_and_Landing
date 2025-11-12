@@ -1,4 +1,7 @@
 I highly recommend using Visual studio code for reading.
+If you need help : add me : "wigludxombu" on discord
+
+
 # Codes : 
 # Starship-Superheavy :
  - Mechazilla : 100%
