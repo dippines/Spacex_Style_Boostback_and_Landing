@@ -96,9 +96,9 @@ until lngoff > x and abs(latoff) < y or AG10 {
     }
 
     if abs(getImpact():lng) - abs(landingsite:lng) > 0 {
-        set k to 1.
-    } else {
         set k to -1.
+    } else {
+        set k to 1.
     }
     if abs(getimpact():lat) - abs(landingsite:lat) < 0 {
         set ang to 1*vang(corr, nv).
