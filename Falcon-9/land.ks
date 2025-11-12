@@ -161,6 +161,8 @@ wait until alt:radar <= alts[3].
 }
     lock steering to ship:up.
     lock throttle to 0.
+    set ship:control:top to 0.
+    set ship:control:starboard to 0.
     toggle ag10.
 }
 //------------Steering------------\\
@@ -183,13 +185,10 @@ function getSteering {
 
 
 
-wait until ship:verticalspeed <0. // When you start the descent
-lock steering to srfRetrograde. // You lock steering to retrograde
-Brakes on. // And open gridfins
-SAS OFF.
-RCS ON.
-wait until alt:radar <=80000. // Until you enter atmosphere
-lock steering to getsteering(). // And you start correcting your trajectory
-wait until alt:radar <= 20000.
+//--Main--\\
+
+lock steering to heading(landingsite:heading(),225).
+wait until ship:verticalspeed <0.
+lock steering to getsteering().
 throt().
 wait until ag10. // To end just press ag10.
