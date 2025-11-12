@@ -19,7 +19,7 @@ I highly recommend using Visual studio code for reading.
 
 # Optional :
 - Starship Ground Expansion 
-- RSS
+- RSS (Sol or Reborn)
 - OCISLY (cam previews)
 
 
@@ -28,3 +28,5 @@ I highly recommend using Visual studio code for reading.
 - Put starship in orbit / IFT-like trajectory (Starting around december)
 - Starship precise position landing code (Starting around december)
 - Clean-up the codes (more readable codes) (once codes are finished) 
+# History of this code :
+I started this code in October 2024, knowing nothing of kOS. I had my exams so there was a big pause from march-august and in october it's back again and better, i revamped all of it and it's much better, still a work in progress but with some tweaking you could get a good starting point.
