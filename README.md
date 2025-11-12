@@ -1,6 +1,6 @@
 I highly recommend using Visual studio code for reading.
 If you need help : add me : "wigludxombu" on discord
-
+Thanks to DanielMoDis and the kOS discord server who helped me
 
 # Codes : 
 # Starship-Superheavy :
