@@ -5,7 +5,7 @@ Thanks to DanielMoDis and the kOS discord server who helped me
 # Codes : 
 # Starship-Superheavy :
  - Mechazilla : 100%
- - Booster landing : 90 %
+ - Booster landing : 98 %
  - Booster Boostback : 60%
  - Ship landing : 0%
  - Orbit : 0%
