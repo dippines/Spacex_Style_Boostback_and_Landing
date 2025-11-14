@@ -6,11 +6,11 @@ Thanks to DanielMoDis and the kOS discord server who helped me
 # Starship-Superheavy :
  - Mechazilla : 100%
  - Booster landing : 90 %
- - Booster Boostback : 80%
+ - Booster Boostback : 60%
  - Ship landing : 0%
  - Orbit : 0%
 # Falcon-9 :
- - Boostback : 80%
+ - Boostback : 60%
  - Booster landing : 99%
  - Buoy cam script : 20%
 
