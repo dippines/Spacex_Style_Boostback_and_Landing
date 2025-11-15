@@ -2,7 +2,7 @@
 //--Variables--\
 set done_ag1 to false.
 set done_ag2 to false.
-// lock g to constant:g* body:mass / body:radius^2. // gravity
+set threengines to ship:verticalspeed >=-100.
 //--Lists---\\
 
 set alts to list(80000,25000,10000,2500,0). // The stages of your flight. Feel free to change
@@ -12,12 +12,11 @@ set maoa to list(4,7,7,2,4). // The AoAs, each value represent the value of the 
 //--Constants--\\
 set radius to 10.
 set boosteroffset to 39.94. 
-set toweroffset to 0.0001.
+// set toweroffset to 0.0001.
 set armsheight to 110.
 
 //--Target--\\
-// lock OLTA to latlng(25.9959253213676,-97.1530954784706-toweroffset).
-lock OLTA to latlng(25.9956786506544 , -96.953023799664-toweroffset).
+lock OLTA to latlng(25.9959253213676,-97.1530954784706).
 // OLT-B : (                ,                 )
 // lock OLTC to latlng(28.6358613988201,-80.6014467035084).
 if hastarget { 
@@ -53,51 +52,42 @@ function fdynaoax {
         if H1 <= radius {
             if throttle > 0 {
             set maoa[4] to vang(-ship:velocity:surface,ship:up:vector).
-                if ship:verticalspeed >=-100 {
+                if threengines {
                         set radius to 20.
                         set fx to f[0].
-                        // print("0,0,0,0").
                 } else {
                   set fx to f[1].
-                //   print("0,0,1").
                 }
             } else {
                 set fx to f[1].
-                // print("0,1").
             }
         } else {
             if throttle > 0 {
-                if ship:verticalspeed >=-100 {
+                if threengines {
                     if H2>0 {
                         set maoa[4] to min(max((90-vang(errorvector()+ship:up:vector,ship:up:vector)),1),5).
                         set fx to f[1].
-                        // print("1,0,0,0").
-                        print(90-vang(errorvector():normalized+ship:up:vector:normalized,ship:up:vector:normalized)/2).
+                        print(90-vang(errorvector()+ship:up:vector,ship:up:vector)/2).
                     } else {
                         set fx to f[0].
                         set maoa[4] to 2.
-                        // print("1,0,0,1").
                     } 
                 } else {
                     set fx to f[1].
                     set maoa[4] to vang(-ship:velocity:surface,ship:up:vector).
-                    // print("1,0,1").
                 }
             }
             else {
                set fx to f[0].
-                // print("1,1").
             }
-        
         }
         set maxaoa to maoa[rx]*fx.
-        // print("H1___:"+ H1).
-        print(errorVector():mag + "Meters precise").
         return maxaoa.
     }
 }
 
 //--Steering--\\
+
 function getImpact {
     if addons:tr:hasimpact { 
     return addons:tr:impactpos. 
@@ -149,11 +139,14 @@ function getSteering {
     }
     rcorrs().
     lock val to lookdirup(result, facing:topvector).
-
-    if ship:verticalspeed >=-100 {
-        set str to R((0.2 * val:pitch) + ((1 - 0.2) * ship:up:pitch),val:yaw,270).
+    set k to 0.3.
+    if threengines {
+        set str to R((k * val:pitch) + ((1 - k) * ship:up:pitch),val:yaw,270).
     } else {
         set str to R(val:pitch,val:yaw,270). 
+    }
+    if alt:radar <=200 {
+        set str to R(ship:up:pitch, ship:up:yaw, 270).
     }
     return str.
 }
@@ -171,35 +164,35 @@ wait until alt:radar <= burn.
         } else if ship:verticalspeed <=-100 {
             set mn to 0.7.
         } else {
-            set mn to 0.1.
+            set mn to 0.
         }
 
-        if done_ag1 = false and ship:verticalspeed >=-100 {
+        if done_ag1 = false and threengines {
             toggle ag1.
-            set radius to 5.
+            set radius to 0.
             set done_ag1 to true.
         }
 
-        if done_ag2 = false and alt:radar <=200 {
-            toggle ag2.
-            lock steering to ship:up.
-            set done_ag2 to true.
+        if alt:radar <=200 {
+            if done_ag2 = false {
+                toggle ag2.
+                set done_ag2 to true.
+            }
         }
         lock throttle to min(max(((ship:verticalspeed^2)/(2*9.81*(ship:bounds:bottomaltradar-armsheight+boosteroffset))),mn),1).
  
     wait 0.2.
 }
-set ship:control:top to 0.
-set ship:control:starboard to 0.
-lock throttle to 0.1.
-lock steering to ship:up.
-lock throttle to 0.
-toggle ag10.
+    set ship:control:top to 0.
+    set ship:control:starboard to 0.
+    lock throttle to 0.2.
+    wait until ship:liquidfuel <=10.
+    toggle ag10.
 }
 
 //--Main--\\
 
-lock steering to heading(landingsite:heading(),225).
+lock steering to srfRetrograde.
 wait until ship:verticalspeed <0.
 lock steering to getsteering().
 landingburn().
