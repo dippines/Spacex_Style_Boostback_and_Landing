@@ -6,9 +6,9 @@ set threengines to ship:verticalspeed >=-100. // Final corrections
 
 //--Lists---\\
 
-set alts to list(80000,25000,10000,2500,0). // The stages of your flight. Feel free to change, I try to make them correspond to atmosphere levels
+set alts to list(80000,50000,15000,2500,0). // The stages of your flight. Feel free to change, I try to make them correspond to atmosphere levels
 set f to list(-1,1). // Factor for the angle of attack (aoa)
-set maoa to list(4,7,7,2,4). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
+set maoa to list(4,6,5,2,4). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
 
 //--Constants--\\
 
@@ -198,3 +198,4 @@ wait until ship:verticalspeed <0.
 lock steering to getsteering().
 landingburn().
 wait until ag10. // To end just press ag10.
+
