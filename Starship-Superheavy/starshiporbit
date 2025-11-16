@@ -1,0 +1,12 @@
+//--Variables--\\
+set meco to 70000. // Boostback start altitude.
+set ap to 200000.
+
+
+
+//--Main--\\
+
+wait until alt:radar >= meco.
+lock throttle to 1.
+lock steering to srfPrograde.
+wait until ship:apoapsis >= ap.
