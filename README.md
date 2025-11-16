@@ -5,8 +5,8 @@ Thanks to DanielMoDis and the kOS discord server who helped me
 # Codes : 
 # Starship-Superheavy :
  - Mechazilla : 100%
- - Booster landing : 98 %
- - Booster Boostback : 60%
+ - Booster landing : 99%
+ - Booster Boostback : 95%
  - Ship landing : 0%
  - Orbit : 0%
 # Falcon-9 :
@@ -29,7 +29,6 @@ Thanks to DanielMoDis and the kOS discord server who helped me
 
 
 # TO-DO (In order)
-- Fix fuel level during boostback and for landing (15-18/10/2025) V1.0 (Superheavy needs to be around 10000 and Falcon 9 around 1000)
 - Put starship in orbit / IFT-like trajectory (Starting around december)
 - Starship precise position landing code (Starting around december)
 - Clean-up the codes (more readable codes) (once codes are finished) 
