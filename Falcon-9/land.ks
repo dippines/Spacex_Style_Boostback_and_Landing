@@ -6,21 +6,20 @@ set f to list(-1,1). // Factor for the angle of attack (aoa)
 set maoa to list(3,4,5,3,2). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
 
 //--Constants--\\
-set boosteroffset to 31.
 set radius to 5.
 set done_ag1 to false.
-
 //------------Target------------\\
-
 set LZ1 to latlng(28.4857625502468,-80.5429426267221).
 //set LZ2 to latlng(28.4877484442497,-80.5449202044373).
 //set LZ3 to latlng(                ,                  ).
-// set OCISLY to latlng(28.6356819213369,-79.4865254914434)
+// set OCISLY to latlng(28.6081189350935,-79.3012441872939)
 
 if hastarget { 
     set landingsite to latlng(target:geoposition:lat, target:geoposition:lng).
+    set LZOFF to target:altitude.
 } else {
     set landingsite to LZ1. // Your landingsite position
+    set LZOFF to 0.
 }
 
 
@@ -41,7 +40,7 @@ function errorVector {
 
 function i {
     if alt:radar > alts[0] {
-        return 0.
+        return maoa[0].
     }
     if alt:radar <= alts[alts:length - 1] {
         return 4.
@@ -90,7 +89,7 @@ function fdynaoax {
         
         }
         set maxaoa to maoa[rx]*fx.
-        print(errorVector():mag).
+        //print(errorVector():mag).
         return maxaoa.
     }
 }
@@ -139,41 +138,45 @@ function rcorrs {
     }
 }
 
-function throt {
+function reentryburn {
+    if alt:radar <= 75000 and ship:verticalspeed <=-800 or ship:liquidfuel >=800 {
+        lock throttle to 1.
+    }
+wait until ship:verticalspeed >= -800 or ship:liquidfuel <=800.
+lock throttle to 0.
+}
+
+function landingburn {
 
 wait until alt:radar <= alts[3].
     until ship:verticalspeed >=0 {
 
         if done_ag1 = false and ship:verticalspeed >=-100 {
             toggle ag1.
-            set radius to 0.01.
+            set radius to 0.
             set done_ag1 to true.
         }
-
-        if alt:radar <= 100 {
+        if ship:bounds:bottomaltradar <= lzoff+150 {
             gear on.
         }
-        if alt:radar <=40 {
-            LOCAL velVec IS ship:velocity:surface.
-            LOCAL upVec IS ship:up:vector:normalized.
-            LOCAL horizontalVelVec IS VXCL(upVec,velVec):normalized.
-            LOCAL finvec is -horizontalVelVec+10*upVec.
-            lock steering to finvec.
-            rcorrs().
+        if ship:bounds:bottomaltradar <= 10 {
+            lock steering to ship:up.
         }
-    lock throttle to min(max(((ship:verticalspeed^2)/(2*9.81*(alt:radar-boosteroffset))),0),1).
+    lock throttle to min(max(((ship:verticalspeed^2)/(2*9.81*(ship:bounds:bottomaltradar-lzoff))),0.1),1).
     wait 0.2.
 }
     lock steering to ship:up.
-    lock throttle to 0.
+    lock throttle to 0.1.
     set ship:control:top to 0.
     set ship:control:starboard to 0.
     toggle ag10.
 }
 
 //----------------------------------------------------MAIN----------------------------------------------------\\
-
-wait until ship:verticalspeed <0.
+brakes.
+lock steering to srfRetrograde.
+wait until alt:radar <=80000.
 lock steering to getsteering().
-throt().
+reentryburn().
+landingburn().
 wait until ag10.
