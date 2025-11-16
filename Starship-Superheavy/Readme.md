@@ -15,10 +15,10 @@
 - Starship Belly flop + catch
 
 # Actions Groups :
-AG1 : Next engine, close arms
-AG5 : Previous engine
-AG7 : start draining (at minimul drain % level)
-AG8 : finish draining
-AG2 : Lock Gridfins
-AG3 : Unlock Gridfins
-AG10 : nothing, don't put something, you can replace it with abort but beware when you use cameras of the "del" key (because it will abort)
+-AG1 : Next engine, close arms
+-AG2 : Lock Gridfins
+-AG3 : Unlock Gridfins
+-AG5 : Previous engine
+-AG7 : start draining (at minimul drain % level)
+-AG8 : finish draining
+-AG10 : nothing, don't put something, you can replace it with abort but beware when you use cameras of the "del" key (because it will abort)
