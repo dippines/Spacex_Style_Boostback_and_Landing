@@ -14,10 +14,12 @@ until false {
   set v1 to VXCL(sh:geoposition:position-Mechazilla:position,ship:up:vector):normalized.
   set v0 to Mechazilla:facing:starvector. 
   
-  if sh:geoposition:lat-ship:geoposition:lat > 0 {
+  if round(sh:geoposition:lat-ship:geoposition:lat,5) > 0 {
     set ang to max(-vang(v1,v0)+8,-56.8).
-  } else {
+  } else if round(sh:geoposition:lat-ship:geoposition:lat,5) < 0 {
     set ang to min(vang(v1,v0)+8,56.8).
+  } else {
+    set ang to 8.
   }
 
   if sh:altitude <=160{ // If the vessel close
