@@ -1,6 +1,5 @@
-
 //--Variables--\
-set done_ag1 to false.
+set done_ag1 to false. // Next engine mode
 //--Lists---\\
 
 set alts to list(80000,25000,10000,2500,0). // The stages of your flight. Feel free to change
@@ -8,10 +7,9 @@ set f to list(-1,1). // Factor for the angle of attack (aoa)
 set maoa to list(4,8,7,3,2). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
 
 //--Constants--\\
-set radius to 10.
-set boosteroffset to 39.94. 
-// set toweroffset to 0.0001.
-set armsheight to 110.
+set radius to 10. // Circle of 10m radius around landingsite
+set boosteroffset to 39.94.  // Booster height
+set armsheight to 110. // Arms height, if you land too low or too high just change this value
 
 //--Target--\\
 lock OLTA to latlng(25.9959261063009,-97.153023799664).
@@ -66,7 +64,6 @@ function fdynaoax {
                     if H2>0 {
                         set maoa[4] to min(max((90-vang(errorvector()+ship:up:vector,ship:up:vector)),1),5).
                         set fx to f[1].
-                        print(90-vang(errorvector()+ship:up:vector,ship:up:vector)/2).
                     } else {
                         set fx to f[0].
                         set maoa[4] to 2.
@@ -98,7 +95,7 @@ function errorVector {
     return landingsite:position - getImpact():position.
 }
 
-function rcorrs {
+function rcorrs { // RCS Function which helps some correction
     RCS ON.
     if alt:radar <= alts[0] { 
 
@@ -138,7 +135,7 @@ function getSteering {
     }
     rcorrs().
     lock val to lookdirup(result, facing:topvector).
-    set k to 0.2.
+    set k to 0.2. // Feel free to change
     if ship:verticalspeed >=-100 {
         set str to R((k * val:pitch) + ((1 - k) * ship:up:pitch),val:yaw,270).
     } else {
@@ -176,19 +173,14 @@ wait until alt:radar <= max(abs(ship:verticalspeed*3),1000).
 }
     set ship:control:top to 0.
     set ship:control:starboard to 0.
-    lock throttle to 0.2.
-    toggle ag7.
+    lock throttle to 0.1.
     wait until ship:liquidfuel <=10.
     toggle ag10.
 }
 
 //--Main--\\
 
-lock steering to ship:facing.
 wait until ship:verticalSpeed <0.
-set ship:control:top to 1.
-lock steering to srfRetrograde.
-wait until vang(srfRetrograde:vector,ship:facing:forevector) <= 10.
 lock steering to getsteering().
 landingburn().
 wait until ag10. // To end just press ag10.
