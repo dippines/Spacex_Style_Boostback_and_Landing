@@ -4,7 +4,7 @@ Thanks to DanielMoDis and the kOS and SEP discords who helped me and where I oft
 
 # Codes : 
 # Starship-Superheavy :
- - Mechazilla : 100%
+ - Mechazilla : 75% --> Need to adapt it for OLT-B ( for now it only works with OLTA and OLTC)
  - Booster landing : 99% --> Need to Clean up
  - Booster Boostback : 99% --> Need to Clean up and have more realistic comportment
  - Ship landing : 0%
