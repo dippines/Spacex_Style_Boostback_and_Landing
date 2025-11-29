@@ -1,19 +1,54 @@
-// More than a preview, less than an actual code
-// I added a more soft return but there still work to do when the boostback end
-// Fuel draining is kinda solve as it works but need some tweaks
+//----------------------------------------------------------------------------------BOOSTBACK SCRIPT-------------------------------------------------------------------------------\\
 
 
 //--Variables--\\
-set done_ag1 to false. // Next engine mode
-set done_ag5 to false. // Previous engine mode
-set meco to 70000. // Boostback start altitude.
+set doneprev to false.
+set donenext to false.
+set chosetarget to false.
+set meco to 60000. // Boostback start altitude.
 set maxalt to 100000. //max alt you want the apoapsis of the boostback to go to : W.I.P.
-lock landingsite to latlng(25.9959261063009 , -97.153023799664). // latlng coordinates of your desired landingsite
-set x to 0. // lngoff you want in real life this would be like -100
+set x to 0.// lngoff you want in real life this would be like -100
 set y to 20. // beware because y act like a clamp, As superheavy is more uncontrollable than F9, don't put very low value unless you're certain about it (im certain about it 😎)
+set cluster to ship:partsnamed("SEP.25.BOOSTER.CLUSTER")[0]:getmodule("ModuleSEPEngineSwitch").
 
-//--Functions--\\
+//--------Functions--------\\
 
+//--Target--\\
+
+function targetland {
+    until chosetarget = true {
+        Print("Waiting for user to chose a landingsite.").
+        set keyPress to terminal:input:getchar().
+        if hastarget { 
+            set landpos to latlng(target:geoposition:lat, target:geoposition:lng).
+            set chosetarget to true.
+        }
+        if keyPress = "a" {
+            set landpos to latlng(25.9962480647979,-97.1547020248853-0.001). // OLT-A
+            set chosetarget to true.
+        }   
+        if keyPress = "b" {
+            set landpos to latlng(25.9967515622019,-97.1579564069524-0.001). // OLT-B
+            set chosetarget to true.
+        }
+        if keyPress = "c" {
+            set landpos to latlng(28.6358613988201,-80.6014467035084-0.001). // OLT-C
+            set chosetarget to true.
+        }
+        if keyPress = "w" {
+            set landpos to latlng(25.9959261063009,-97.153023799664). // Water Test
+            set chosetarget to true.
+        }
+        if keyPress = "o" {
+            set landpos to latlng(25.8669450105354,-95.5781057662035). // Offshore platform
+            set chosetarget to true.
+        }
+    wait 0.5.
+    }
+    return landpos.
+}
+
+set landingsite to targetland().
 //--GetImpact--\\
 
 function getImpact {
@@ -23,35 +58,33 @@ function getImpact {
 return ship:geoposition.
 }
 
-//--Target--\\
-
-if hastarget { 
-    lock landingsite to latlng(target:geoposition:lat, target:geoposition:lng). // latlng in case you have a target set
-}
-
 //--Error vector--\\
 
 function errorVector {   
-    return  landingsite:position - getImpact():position.
+    return landingsite:position - getImpact():position.
 }
 
-//----------------------------------------------------------------------------------BOOSTBACK-------------------------------------------------------------------------------\\
+
+
+//----------------------------------------------------------------------------------MAIN-------------------------------------------------------------------------------\\
+
+print("Boostback is set for " + landingsite).
 
 //--MECO SEQUENCE--\\
 
-when alt:radar >=meco-5000 then {
-  toggle ag1.
-  lock throttle to 1.
-}
-
-when alt:radar >=meco-2500 then {
-  toggle ag1.
-  lock throttle to 1.
+when alt:radar >=meco-1000 then {
+  SAS OFF.
+  RCS on.
+  cluster:doevent("next engine mode").
+  lock steering to R(ship:facing:pitch,ship:facing:yaw,270).
+  lock throttle to 0.25.
 }
 
 when alt:radar >=meco-500 then {
-  lock throttle to 0.1.
-  stage. // Ship should start throttling
+  cluster:doevent("next engine mode").
+  stage. // Starship engines
+  stage.
+  lock throttle to 0.
 }
 
 //--Activator--\\
@@ -59,79 +92,73 @@ when alt:radar >=meco-500 then {
 wait until alt:radar >= meco.
 
 //--More variables--\\
-
 set t1 to landingsite:position - getImpact():position. // Landingsite - your impact pos, needed for my throttle ratio formula
 set tin to abs(errorVector():mag/ship:velocity:surface:mag/2).
-
 //--longitude and latitude offset in meters--\\
 
 lock lngoff to (landingsite:LNG - ADDONS:TR:IMPACTPOS:LNG)*10472. 
 lock latoff to (landingsite:LAT - ADDONS:TR:IMPACTPOS:LAT)*10472. 
 toggle ag3. // Gridfins
-RCS on.
-SAS OFF.
 
-if abs(getImpact():lng) - abs(landingsite:lng) > 0 {
+
+if abs(ship:geoposition:lng) - abs(landingsite:lng) > 0 {
     set k to -1.
-} else {                        // W.I.P.
+} else {
     set k to 1.
 }
-
-
 until vang(heading(k*landingsite:heading,0):vector,ship:facing:forevector) <= 10 {
-    set ship:control:top to 1.
-    set ship:control:starboard to (ship:up:pitch - ship:facing:pitch)/2*abs((ship:up:pitch - ship:facing:pitch)).      
+    set ship:control:starboard to (ship:up:pitch - ship:facing:pitch)/abs((ship:up:pitch - ship:facing:pitch)).
     lock throttle to 0.1.
-} // You return yourself without lock steering so it's smoother and more realistic
+    lock steering to heading(k*landingsite:heading, 0).
+}
+until lngoff > x and abs(latoff) < y or AG10 {    
 
-until lngoff > x and abs(latoff) < y or AG10 {
-    lock pr to t1:mag/maxalt. // W.I.P.
-    lock bbt to errorVector():mag/t1:mag. // Throttle ratio
+    if doneprev = false {
+        cluster:doevent("previous engine mode").
+        set doneprev to true.
+    }
+    
+    lock bbt to errorVector():mag/t1:mag.
     set corr to VXCL(ship:sensors:grav,landingsite:position-ship:position). // straight vec from you to landingpos, on the same plan as errorvec.
-    set tsvl to VXCL(ship:sensors:grav,(ship:direction:STARVECTOR)*latoff). // Latitude part of the errorvector()
+    set tsvl to VXCL(ship:sensors:grav,(ship:direction:STARVECTOR)*latoff).
 
     //--Engines--\\
 
-    if done_ag5 = false {
-        toggle ag5.
-        set done_ag5 to true.
-    }
-
-    if abs(lngoff) <=500 and done_ag1 = false {
-        toggle ag1.
-        set done_ag1 to true.   // When you're close switch to three engines, W.I.P.
+    if abs(lngoff) <=50 and donenext = false { 
+        cluster:doevent("next engine mode").
+        set donenext to true.    
     }
 
     //--Steering--\\
     
     if apoapsis>=maxalt {
-        lock tilt to -5.
-    } else {                    // W.I.P.
-        lock tilt to 5.
+        lock tilt to -(ship:apoapsis - maxalt) / 5000.
+    } else {
+        lock tilt to (ship:apoapsis - maxalt) / 5000.
     }
 
-    if abs(lngoff) <=5000 {
-        set nv to corr+10*tsvl.
-    } else {                              // Works, but W.I.P. 10* and 5* will be replaced
-        set nv to corr+5*tsvl.
-    }
+    set gain to abs(max(10, 20 - (abs(lngoff) / 2500))).
+    
+    set nv to corr + gain * tsvl.
 
     if abs(getimpact():lat) - abs(landingsite:lat) < 0 {
         set ang to 1*vang(corr, nv).
     } else {
-        set ang to -1*vang(corr, nv).                        // Corection angle
+        set ang to -1*vang(corr, nv).
     }
-    set fdir to heading(k*landingsite:heading+ang, tilt).            //finaldirection
 
-    //-- FUEL CONTROL--\\
+    set fdir to heading(k*landingsite:heading+ang, tilt).
+
+    //--RCS AND FUEL CONTROL--\\
 
     if vang(heading(k*landingsite:heading+ang, tilt):vector,ship:facing:forevector) <= 10 {
     
-        set lp2 to getimpact():lat-landingsite:lat. // Latitude error
-        set t to abs(errorVector():mag/ship:velocity:surface:mag). // Time to go from errorvector distance with your speed
-        set fcalc to ((ship:liquidfuel-9000)/3886.20). // Time to drain the liquidfuel to 9000units
+        set lp2 to getimpact():lat-landingsite:lat. 
+        set t to abs(errorVector():mag/ship:velocity:surface:mag).
+        set fcalc to ((ship:liquidfuel-9000)/3886.20).
+        set SHIP:CONTROL:STARBOARD to (lp2/abs(lp2)).
 
-        if round(fcalc) <= abs(round(tin)-round(t)) { // Weird calculus to know the time to start draining, but it works 
+        if round(fcalc) <= abs(round(tin)-round(t)) {
             if ship:liquidfuel >=11000 {
                 ag7 on.
             } else {
@@ -142,25 +169,25 @@ until lngoff > x and abs(latoff) < y or AG10 {
 
     //--Main Control--\\
 
-    lock steering to R(fdir:pitch,fdir:yaw,240). // Steering
-    lock throttle to abs(min(max(bbt,0.01),1))*pr. // Throttle
-    set SHIP:CONTROL:STARBOARD to (lp2/abs(lp2)). // RCS
+    lock steering to R(fdir:pitch,fdir:yaw,fdir:roll+180).
+    lock throttle to abs(min(max(bbt,0.01),1)).
+    print ("lng error : " + lngoff).
+    print ("lat error : " + latoff).
 
-wait 0.1.
+wait 0.2.
 }
-
-until vang(srfRetrograde:vector,ship:facing:forevector) <= 10 {
-    unlock steering.
-    lock throttle to 0.
-    lock steering to ship:srfRetrograde+R(0,0,270).                                            // W.I.P.
-    set ship:control:top to -1.
-    set ship:control:starboard to (ship:up:pitch - ship:facing:pitch)/abs((ship:up:pitch - ship:facing:pitch)).      
-}
-
+lock throttle to 0.
+unlock steering.
 stage. // HSR
 set ship:control:starboard to 0.
 set ship:control:top to 0.
+cluster:doevent("previous engine mode").
+
+wait until ship:verticalspeed<=0.
+set ship:control:top to -1.
+set ship:control:starboard to (ship:up:pitch - ship:facing:pitch)/abs((ship:up:pitch - ship:facing:pitch)).      
+wait 5.
+set ship:control:starboard to 0.
+set ship:control:top to 0.
 lock steering to srfRetrograde.
-wait until alt:radar <=90000.
-toggle ag5.
-run land.
+wait until terminal:input:getchar() = "g".
