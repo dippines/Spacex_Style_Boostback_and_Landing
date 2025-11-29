@@ -5,8 +5,8 @@ Thanks to DanielMoDis and the kOS and SEP discords who helped me and where I oft
 # Codes : 
 # Starship-Superheavy :
  - Mechazilla : 100%
- - Booster landing : 99% --> Clean up, fix ship roll when landing(it's not really an issue because it land with 0m error)
- - Booster Boostback : 98% -- > Better return at the end
+ - Booster landing : 99% --> Need to Clean up
+ - Booster Boostback : 99% --> Need to Clean up and have more realistic comportment
  - Ship landing : 0%
  - Orbit : 5%
 # Falcon-9 :
