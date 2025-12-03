@@ -24,15 +24,15 @@ function targetland {
             set chosetarget to true.
         }
         if keyPress = "a" {
-            set landpos to latlng(25.9962480647979,-97.1547020248853-0.001). // OLT-A
+            set landpos to latlng(25.9962480647979,-97.1547020248853). // OLT-A
             set chosetarget to true.
         }   
         if keyPress = "b" {
-            set landpos to latlng(25.9967515622019,-97.1579564069524-0.001). // OLT-B
+            set landpos to latlng(25.9967515622019-0.001,-97.1579564069524-0.001). // OLT-B
             set chosetarget to true.
         }
         if keyPress = "c" {
-            set landpos to latlng(28.6358613988201,-80.6014467035084-0.001). // OLT-C
+            set landpos to latlng(28.6081649600038,-80.6012491850909). // OLT-C
             set chosetarget to true.
         }
         if keyPress = "w" {
@@ -68,22 +68,20 @@ function errorVector {
 
 //----------------------------------------------------------------------------------MAIN-------------------------------------------------------------------------------\\
 
-print("Boostback is set for " + landingsite).
-
+lock steering to R(ship:facing:pitch,ship:facing:yaw,270).
 //--MECO SEQUENCE--\\
 
 when alt:radar >=meco-1000 then {
   SAS OFF.
   RCS on.
   cluster:doevent("next engine mode").
-  lock steering to R(ship:facing:pitch,ship:facing:yaw,270).
+  stage.
   lock throttle to 0.25.
 }
 
 when alt:radar >=meco-500 then {
   cluster:doevent("next engine mode").
   stage. // Starship engines
-  stage.
   lock throttle to 0.
 }
 
@@ -191,3 +189,4 @@ set ship:control:starboard to 0.
 set ship:control:top to 0.
 lock steering to srfRetrograde.
 wait until terminal:input:getchar() = "g".
+print("Go for landing").
