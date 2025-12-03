@@ -5,9 +5,7 @@
 
 # Some stats : 
 - Boostback is every time <1m precise
-- Landing is always <10 m precise, catched every time
-- Mechazilla is meter precise
-- 
+- Landing is always meter precise, catched every time
 # Things to come :
 - Starship orbit
 - Starship deorbit + landing
