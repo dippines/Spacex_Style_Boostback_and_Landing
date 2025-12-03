@@ -15,31 +15,30 @@ LOCK upVector TO SHIP:UP:VECTOR.
 
 LOCK eastVector TO VCRS(upVector, northVector).
 
-LOCK myShipVector TO VXCL(ship:facing:forevector,ship:facing:starvector).
+LOCK shipvec TO VXCL(ship:facing:forevector,ship:facing:starvector).
 
-LOCK northComponent TO ROUND(VDOT(myShipVector, northVector)).
-LOCK eastComponent TO ROUND(VDOT(myShipVector, eastVector)).
+LOCK northComponent TO -ROUND(VDOT(shipvec, northVector)).
+LOCK eastComponent TO ROUND(VDOT(shipvec, eastVector)).
 
 //--Main--\\
 
 until false {
-  set v1 to VXCL(sh:geoposition:position-Mechazilla:position,ship:up:vector):normalized.
-  set v0 to ship:facing:starvector.
+  local v1 is VXCL(sh:geoposition:position-Mechazilla:position,ship:up:vector):normalized.
+  local v0 is ship:facing:starvector.
 
-  set dlat to sh:geoposition:lat-geolat.
-  set dlng to sh:geoposition:lng-geolng.
+  local dlat is sh:geoposition:lat-geolat.
+  local dlng is sh:geoposition:lng-geolng.
 
-  set orientdelta to eastComponent*dlat + northComponent*dlng.
+  local orientdelta is round(eastComponent*dlat + northComponent*dlng,5).
 
   if orientdelta > 0  {
-    set ang to max(-vang(v1,v0),-56.8).
+    set ang to max(-vang(v1,v0)+8,-56.8).
   } else if orientdelta < 0 {
-    set ang to min(vang(v1,v0),56.8).
+    set ang to min(vang(v1,v0)-8,56.8).
   } else {
     set ang to 8.
   }
-
-  if sh:altitude <=160 + offset { // If the vessel close
+  if sh:altitude <=145 + offset { // If the vessel close
     MZ:doevent("close arms").
     wait until sh:velocity:surface:mag <= 5.
     break.
