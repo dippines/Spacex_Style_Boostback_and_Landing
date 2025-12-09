@@ -7,8 +7,7 @@ set donenext to false.
 set chosetarget to false.
 set meco to 60000. // Boostback start altitude.
 set maxalt to 100000. //max alt you want the apoapsis of the boostback to go to : W.I.P.
-set x to 0.// lngoff you want in real life this would be like -100
-set y to 20. // beware because y act like a clamp, As superheavy is more uncontrollable than F9, don't put very low value unless you're certain about it (im certain about it 😎)
+set x to 50.// lngoff you want
 set cluster to ship:partsnamed("SEP.25.BOOSTER.CLUSTER")[0]:getmodule("ModuleSEPEngineSwitch").
 
 //--------Functions--------\\
@@ -16,38 +15,49 @@ set cluster to ship:partsnamed("SEP.25.BOOSTER.CLUSTER")[0]:getmodule("ModuleSEP
 //--Target--\\
 
 function targetland {
-    until chosetarget = true {
+    until chosetarget = true{
         Print("Waiting for user to chose a landingsite.").
+        
         set keyPress to terminal:input:getchar().
-        if hastarget { 
+        
+        if keyPress = "t" { 
             set landpos to latlng(target:geoposition:lat, target:geoposition:lng).
             set chosetarget to true.
         }
         if keyPress = "a" {
             set landpos to latlng(25.9962480647979,-97.1547020248853). // OLT-A
+            clearScreen.
+            print("Go for boostback at OLT-A").
             set chosetarget to true.
         }   
         if keyPress = "b" {
-            set landpos to latlng(25.9967515622019-0.001,-97.1579564069524-0.001). // OLT-B
+            set landpos to latlng(25.9967515622019,-97.1579564069524). // OLT-B
+            clearScreen.
+            print("Go for boostback at OLT-B").
             set chosetarget to true.
         }
         if keyPress = "c" {
-            set landpos to latlng(28.6081649600038,-80.6012491850909). // OLT-C
+            set landpos to latlng(28.6081826102928,-80.601304446744). // OLT-C
+            clearScreen.
+            print("Go for boostback at OLT-C").
             set chosetarget to true.
         }
         if keyPress = "w" {
-            set landpos to latlng(25.9959261063009,-97.153023799664). // Water Test
+            set landpos to latlng(25.9962480647979,-96). // Water Test
+            clearScreen.
+            print("Catch aborted, Go for boostback for water landing").
             set chosetarget to true.
         }
         if keyPress = "o" {
             set landpos to latlng(25.8669450105354,-95.5781057662035). // Offshore platform
+            clearScreen.
+            print("Go for boostback at OFFSHORE PLATFORM").
             set chosetarget to true.
         }
     wait 0.5.
     }
     return landpos.
 }
-
 set landingsite to targetland().
 //--GetImpact--\\
 
@@ -63,8 +73,6 @@ return ship:geoposition.
 function errorVector {   
     return landingsite:position - getImpact():position.
 }
-
-
 
 //----------------------------------------------------------------------------------MAIN-------------------------------------------------------------------------------\\
 
@@ -104,12 +112,13 @@ if abs(ship:geoposition:lng) - abs(landingsite:lng) > 0 {
 } else {
     set k to 1.
 }
-until vang(heading(k*landingsite:heading,0):vector,ship:facing:forevector) <= 10 {
-    set ship:control:starboard to (ship:up:pitch - ship:facing:pitch)/abs((ship:up:pitch - ship:facing:pitch)).
-    lock throttle to 0.1.
+set ship:control:top to 1.
+until vang(heading(k*landingsite:heading,0):vector,ship:facing:forevector) <= 25 {
+    // set ship:control:starboard to (ship:up:pitch - ship:facing:pitch)/abs((ship:up:pitch - ship:facing:pitch)).
+    lock throttle to 0.2.
     lock steering to heading(k*landingsite:heading, 0).
 }
-until lngoff > x and abs(latoff) < y or AG10 {    
+until lngoff > x or AG10 {
 
     if doneprev = false {
         cluster:doevent("previous engine mode").
@@ -135,9 +144,8 @@ until lngoff > x and abs(latoff) < y or AG10 {
         lock tilt to (ship:apoapsis - maxalt) / 5000.
     }
 
-    set gain to abs(max(10, 20 - (abs(lngoff) / 2500))).
     
-    set nv to corr + gain * tsvl.
+    set nv to corr + 15* tsvl.
 
     if abs(getimpact():lat) - abs(landingsite:lat) < 0 {
         set ang to 1*vang(corr, nv).
@@ -167,24 +175,26 @@ until lngoff > x and abs(latoff) < y or AG10 {
 
     //--Main Control--\\
 
-    lock steering to R(fdir:pitch,fdir:yaw,fdir:roll+180).
+    lock steering to R(fdir:pitch,fdir:yaw,fdir:roll-180).
     lock throttle to abs(min(max(bbt,0.01),1)).
     print ("lng error : " + lngoff).
     print ("lat error : " + latoff).
 
 wait 0.2.
 }
+
 lock throttle to 0.
 unlock steering.
 stage. // HSR
 set ship:control:starboard to 0.
 set ship:control:top to 0.
 cluster:doevent("previous engine mode").
-
 wait until ship:verticalspeed<=0.
 set ship:control:top to -1.
-set ship:control:starboard to (ship:up:pitch - ship:facing:pitch)/abs((ship:up:pitch - ship:facing:pitch)).      
-wait 5.
+until vang(srfRetrograde:vector,ship:facing:forevector) <= 20 {
+    set ship:control:starboard to -(ship:up:pitch - ship:facing:pitch)/abs((ship:up:pitch - ship:facing:pitch)).      
+    lock steering to srfRetrograde.
+}
 set ship:control:starboard to 0.
 set ship:control:top to 0.
 lock steering to srfRetrograde.
