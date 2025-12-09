@@ -8,13 +8,13 @@ set cluster to ship:partsnamed("SEP.25.BOOSTER.CLUSTER")[0]:getmodule("ModuleSEP
 //--Lists---\\
 
 set alts to list(80000,25000,10000,2500,0). // The stages of your flight. Feel free to change
-set maoa to list(2,4,7,2,2). // The AoAs, each value represent the value of the aoa for the stage of the flight in alts, they have the same index number. Feel free to change
+set maoa to list(2,4,7,2,2). // each value represent the max angle from retrograde you want during each stage of the flight in alts, they have the same index number. Feel free to change
 
 //--Constants--\\
-set radius to 10.
-set boosteroffset to 70.
-set heightoffset to ship:bounds.
-lock h to heightoffset:bottomaltradar+boosteroffset.
+set radius to 10. // Precision of the landing
+set boosteroffset to 70. // Booster height
+set shipbox to ship:bounds.
+lock h to shipbox:bottomaltradar+boosteroffset. // The top altitude of the booster
 
 //--------Functions--------\\
 
@@ -76,7 +76,7 @@ function targetland {
 }
 
 set landingsite to targetland().
-set armsheight to 134+max(landingsite:terrainheight,0).
+set armsheight to 134+max(landingsite:terrainheight,0). // Real value is 135 but for a smooth landing 134 is better
 
 //--AoA--\\
 
@@ -96,17 +96,15 @@ function i {
 }
 
 function aoax { 
-    // local t is h / abs(ship:verticalspeed).	
     local f is list(-1,1).
     local H1 is round(errorVector():mag).
-    local H2 is (getimpact():lng-landingsite:lng)/abs(getimpact():lng-landingsite:lng).
-    local tiltangle is vang(errorvector()-ship:velocity:surface,-ship:velocity:surface).
-    local retrangle is vang(-ship:velocity:surface,ship:up:vector).
-    // local calcaoa is arcTan((2*(H1+ship:groundspeed*t))/(t*(ship:sensors:grav:mag*t-ship:verticalspeed)))/2.5.
+    local H2 is (getimpact():lng-landingsite:lng)/abs(getimpact():lng-landingsite:lng). // -1/1 if you are past or ahead (in lng) of landingsite
+    local tiltangle is vang(errorvector()-ship:velocity:surface,-ship:velocity:surface). // Tilting angle towards tower
+    local retrangle is vang(-ship:velocity:surface,ship:up:vector). // angle you want to be like ship:up
     local fac is clamp(h/armsheight,1,5).
     if throttle > 0 {
         if threengines {
-            set maoa[4] to clamp(tiltangle,retrangle,retrangle*fac).
+            set maoa[4] to clamp(tiltangle,retrangle,retrangle*fac). // The more you are close to the tower the more you want to be vertical
             set fx to H2.
         } else {
             set fx to f[1].
@@ -137,7 +135,7 @@ function errorVector {
     return landingsite:position - getImpact():position.
 }
 
-function rcorrs {
+function rcorrs { // RCS Correction depending of the roll of the ship and errorvector
     if alts[1] >= h and h >= armsheight+20{
         local ro is ship:facing:roll.
         local lngoff is getimpact():lng - landingsite:lng.
@@ -176,8 +174,7 @@ function getSteering {
         set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
     }
     rcorrs().
-    // ROLL
-    // RECEVOIR MESSAGE DE MZ
+    // ROLL : COMING SOON
 
     local val to lookdirup(result, facing:topvector).
     
@@ -188,7 +185,7 @@ function getSteering {
         set str to R(val:pitch,val:yaw,270). 
     }
     if h <=20+armsheight {
-        set str to R(ship:up:pitch, ship:up:yaw, 270).
+        set str to R(ship:up:pitch, ship:up:yaw, 270). // You point up when you're close, the code might works without that it's a safety measure
     }
     return str.
 }
@@ -212,13 +209,13 @@ wait until h <= max(abs(ship:verticalspeed*3),800).
         } else if threengines {
             set mn to 0.
         }
-    lock throttle to clamp(((ship:verticalspeed^2)/(2*9.81*(h-armsheight))),mn,1).
+    lock throttle to clamp(((ship:verticalspeed^2)/(2*9.81*(h-armsheight))),mn,1). // Throttle to be 0m/s at armsheight 
     wait 0.15.
     
 }
     RCS off.
-    toggle ag2.
-    stage.
+    toggle ag2. // booster core rcs (drain fuel)
+    stage. // Engine smoke
     set ship:control:top to 0.
     set ship:control:starboard to 0.
     LOCK THROTTLE TO 0.1.
@@ -229,7 +226,7 @@ wait until h <= max(abs(ship:verticalspeed*3),800).
 //----------------------------------------------------------------------------------MAIN-------------------------------------------------------------------------------\\
 RCS ON.
 wait until ship:verticalSpeed <0.
-
 lock steering to getsteering().
 landingburn().
 wait until ag10. // To end just press ag10.
+
