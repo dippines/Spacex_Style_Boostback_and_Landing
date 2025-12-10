@@ -8,7 +8,7 @@ set cluster to ship:partsnamed("SEP.25.BOOSTER.CLUSTER")[0]:getmodule("ModuleSEP
 //--Lists---\\
 
 set alts to list(80000,25000,10000,2500,0). // The stages of your flight. Feel free to change
-set maoa to list(2,4,7,2,2). // each value represent the max angle from retrograde you want during each stage of the flight in alts, they have the same index number. Feel free to change
+set maoa to list(2,6,7,2,2). // each value represent the max angle from retrograde you want during each stage of the flight in alts, they have the same index number. Feel free to change
 
 //--Constants--\\
 set radius to 10. // Precision of the landing
@@ -19,7 +19,6 @@ lock h to shipbox:bottomaltradar+boosteroffset. // The top altitude of the boost
 //--------Functions--------\\
 
 //--Clamp--\\
-
 function clamp {
     parameter val.
     parameter minn.
@@ -30,7 +29,6 @@ function clamp {
 //--Targets--\\
 
 function targetland {
-    parameter armsoffset to 0.0001. // Short arms / long arms
     until chosetarget = true{
         Print("Waiting for user to chose a landingsite.").
         
@@ -53,7 +51,7 @@ function targetland {
             set chosetarget to true.
         }
         if keyPress = "c" {
-            set landpos to latlng(28.6081826102928,-80.601304446744-armsoffset). // OLT-C
+            set landpos to latlng(28.6081826102928,-80.601304446744). // OLT-C
             clearScreen.
             print("Go for Catch at OLT-C").
             set chosetarget to true.
@@ -118,7 +116,6 @@ function aoax {
         }
     }
         set finalaoa to maoa[i()]*fx.
-        // print(errorVector():mag + ":___Meters precise").
         return finalaoa.
 }
 
@@ -178,16 +175,19 @@ function getSteering {
 
     local val to lookdirup(result, facing:topvector).
     
-    local k to 0.1.
+    local a to 0.1.
     if threengines = true {
-        set str to R((k * val:pitch) + ((1 - k) * ship:up:pitch),val:yaw,270).
+        set steer to R((a * val:pitch) + ((1 - a) * ship:up:pitch),val:yaw,270).
     } else {
-        set str to R(val:pitch,val:yaw,270). 
+        set steer to R(val:pitch,val:yaw,270). 
     }
-    if h <=20+armsheight {
-        set str to R(ship:up:pitch, ship:up:yaw, 270). // You point up when you're close, the code might works without that it's a safety measure
+    if h <=10+armsheight {
+        set steer to R(ship:up:pitch, ship:up:yaw, 270). 
     }
-    return str.
+    print((ship:sensors:acc:mag)).
+    print(errorVector():mag + ":___Meters precise").
+
+    return steer.
 }
 
 //--Throttle--\\
@@ -209,16 +209,17 @@ wait until h <= max(abs(ship:verticalspeed*3),800).
         } else if threengines {
             set mn to 0.
         }
-    lock throttle to clamp(((ship:verticalspeed^2)/(2*9.81*(h-armsheight))),mn,1). // Throttle to be 0m/s at armsheight 
+    lock throttle to clamp(((ship:verticalspeed^2)/(2*ship:sensors:grav:mag*(h-armsheight))),mn,1). // Throttle to be 0m/s at armsheight 
     wait 0.15.
     
 }
     RCS off.
-    toggle ag2. // booster core rcs (drain fuel)
     stage. // Engine smoke
     set ship:control:top to 0.
     set ship:control:starboard to 0.
     LOCK THROTTLE TO 0.1.
+    wait 30.
+    toggle ag2. // booster core rcs (drain fuel)
     wait until ship:liquidfuel <=10 or AG10.
     toggle ag10.
 }
@@ -229,4 +230,3 @@ wait until ship:verticalSpeed <0.
 lock steering to getsteering().
 landingburn().
 wait until ag10. // To end just press ag10.
-
