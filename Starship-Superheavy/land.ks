@@ -1,24 +1,70 @@
 //----------------------------------------------------------------------------------LANDING SCRIPT-------------------------------------------------------------------------------\\
 
 //--Variables--\
-set threengines to false.
-set chosetarget to false.
-set cluster to ship:partsnamed("SEP.25.BOOSTER.CLUSTER")[0]:getmodule("ModuleSEPEngineSwitch").
-
-//--Lists---\\
 
 set alts to list(80000,25000,10000,2500,0). // The stages of your flight. Feel free to change
 set maoa to list(2,6,7,2,2). // each value represent the max angle from retrograde you want during each stage of the flight in alts, they have the same index number. Feel free to change
-
-//--Constants--\\
+set threengines to false.
+set targetchose to false.
+set cluster to ship:partsnamed("SEP.25.BOOSTER.CLUSTER")[0]:getmodule("ModuleSEPEngineSwitch").
 set radius to 10. // Precision of the landing
 set boosteroffset to 70. // Booster height
 set shipbox to ship:bounds.
 lock h to shipbox:bottomaltradar+boosteroffset. // The top altitude of the booster
+set landingsite to targetland().
+set armsheight to 134+max(landingsite:terrainheight,0).
 
 //--------Functions--------\\
 
+//--Targets--\\
+
+function targetland {
+    until targetchose = true{
+        Print("Waiting for user to chose a landingsite.").
+        
+        set keyPress to terminal:input:getchar().
+        
+        if keyPress = "t" { 
+            set landpos to latlng(target:geoposition:lat, target:geoposition:lng).
+            set targetchose to true.
+        }
+        if keyPress = "a" {
+            set landpos to latlng(25.9962485183524,-97.154732239204). // OLT-A
+            clearScreen.
+            print("Go for Catch at OLT-A").
+            set targetchose to true.
+        }   
+        if keyPress = "b" {
+            set landpos to latlng(25.9967515622019,-97.1579564069524). // OLT-B
+            clearScreen.
+            print("Go for Catch at OLT-B").
+            set targetchose to true.
+        }
+        if keyPress = "c" {
+            set landpos to latlng(28.6081826102928,-80.601304446744). // OLT-C
+            clearScreen.
+            print("Go for Catch at OLT-C").
+            set targetchose to true.
+        }
+        if keyPress = "w" {
+            set landpos to latlng(25.9962480647979,-96). // Water Test
+            clearScreen.
+            print("Catch aborted, landing in water").
+            set targetchose to true.
+        }
+        if keyPress = "o" {
+            set landpos to latlng(25.8669450105354,-95.5781057662035). // Offshore platform
+            clearScreen.
+            print("Go for Catch at OFFSHORE PLATFORM").
+            set targetchose to true.
+        }
+    wait 0.5.
+    }
+    return landpos.
+}
+
 //--Clamp--\\
+
 function clamp {
     parameter val.
     parameter minn.
@@ -26,71 +72,26 @@ function clamp {
     return min(max(val,minn),maxx).
 }
 
-//--Targets--\\
+//--Steering--\\
 
-function targetland {
-    until chosetarget = true{
-        Print("Waiting for user to chose a landingsite.").
-        
-        set keyPress to terminal:input:getchar().
-        
-        if keyPress = "t" { 
-            set landpos to latlng(target:geoposition:lat, target:geoposition:lng).
-            set chosetarget to true.
-        }
-        if keyPress = "a" {
-            set landpos to latlng(25.9962485183524,-97.154732239204). // OLT-A
-            clearScreen.
-            print("Go for Catch at OLT-A").
-            set chosetarget to true.
-        }   
-        if keyPress = "b" {
-            set landpos to latlng(25.9967515622019,-97.1579564069524). // OLT-B
-            clearScreen.
-            print("Go for Catch at OLT-B").
-            set chosetarget to true.
-        }
-        if keyPress = "c" {
-            set landpos to latlng(28.6081826102928,-80.601304446744). // OLT-C
-            clearScreen.
-            print("Go for Catch at OLT-C").
-            set chosetarget to true.
-        }
-        if keyPress = "w" {
-            set landpos to latlng(25.9962480647979,-96). // Water Test
-            clearScreen.
-            print("Catch aborted, landing in water").
-            set chosetarget to true.
-        }
-        if keyPress = "o" {
-            set landpos to latlng(25.8669450105354,-95.5781057662035). // Offshore platform
-            clearScreen.
-            print("Go for Catch at OFFSHORE PLATFORM").
-            set chosetarget to true.
-        }
-    wait 0.5.
+function getImpact {
+    if addons:tr:hasimpact { 
+    return addons:tr:impactpos. 
     }
-    return landpos.
+return ship:geoposition.
 }
 
-set landingsite to targetland().
-set armsheight to 134+max(landingsite:terrainheight,0). // Real value is 135 but for a smooth landing 134 is better
-
-//--AoA--\\
+function errorVector {   
+    return landingsite:position - getImpact():position.
+}
 
 function i {
-    
-    if alt:radar > alts[0] {
-        maoa[0].
-    }
-    if alt:radar <= alts[alts:length - 1] {
-        return 0.
-    } 
-    for idx in range(0, alts:length - 1) {
-        if alt:radar <= alts[idx] and alt:radar > alts[idx+1] {
-            return idx + 1. // Gives the index number that fits your alt, Example : vessel is at 30km, it will give 1 (alts[1]=25000)
+    from {local idx is 0.} until idx >= alts:length step {set idx to idx+1.} do {
+        if alt:radar > alts[idx] {
+            return idx. 
         }
     }
+    return 0.
 }
 
 function aoax { 
@@ -119,18 +120,33 @@ function aoax {
         return finalaoa.
 }
 
-//--Steering--\\
-
-function getImpact {
-    if addons:tr:hasimpact { 
-    return addons:tr:impactpos. 
+function getSteering {
+    local velVector is -ship:velocity:surface.
+    local correctionVector to errorVector().
+    local result is velVector + correctionVector.
+    local aoa is aoax().
+    if vang(result, velVector) > aoa {
+        set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
     }
-return ship:geoposition.
+    rcorrs().
+
+    local val to lookdirup(result, facing:topvector).
+    local a to 0.1.
+
+    if threengines = false {
+        set steer to R(val:pitch,val:yaw,270). 
+    } else if threengines = true and h >= armsheight+20 {
+        set steer to R((a * val:pitch) + ((1 - a) * ship:up:pitch),val:yaw,270).
+    } else if threengines = true and h <= armsheight+20 {
+        set steer to R(ship:up:pitch, ship:up:yaw,270). 
+    }
+    
+    // print((ship:sensors:acc:mag)).
+    print(errorVector():mag + "  Meters precise").
+    return steer.
 }
 
-function errorVector {   
-    return landingsite:position - getImpact():position.
-}
+//--Throttle--\\
 
 function rcorrs { // RCS Correction depending of the roll of the ship and errorvector
     if alts[1] >= h and h >= armsheight+20{
@@ -155,48 +171,18 @@ function rcorrs { // RCS Correction depending of the roll of the ship and errorv
         } else {
             set SHIP:CONTROL:STARBOARD to 0.
         }
-    } else if h >= armsheight+20 {
+    } else if h <= armsheight+20 {
     set ship:control:starboard to (ship:up:pitch - ship:facing:pitch)/abs((ship:up:pitch - ship:facing:pitch)).
     set ship:control:top to (ship:up:yaw - ship:facing:yaw)/abs((ship:up:yaw - ship:facing:yaw)).
     set ship:control:fore to 1.
 }
 }
 
-function getSteering {
-    local velVector is -ship:velocity:surface.
-    local correctionVector to errorVector().
-    local result is velVector + correctionVector.
-    local aoa is aoax().
-    if vang(result, velVector) > aoa {
-        set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
-    }
-    rcorrs().
-    // ROLL : COMING SOON
-
-    local val to lookdirup(result, facing:topvector).
-    
-    local a to 0.1.
-    if threengines = true {
-        set steer to R((a * val:pitch) + ((1 - a) * ship:up:pitch),val:yaw,270).
-    } else {
-        set steer to R(val:pitch,val:yaw,270). 
-    }
-    if h <=10+armsheight {
-        set steer to R(ship:up:pitch, ship:up:yaw, 270). 
-    }
-    print((ship:sensors:acc:mag)).
-    print(errorVector():mag + ":___Meters precise").
-
-    return steer.
-}
-
-//--Throttle--\\
-
 function landingburn {
 wait until h <= alts[3].
 wait until h <= max(abs(ship:verticalspeed*3),800).
+    cluster:doevent("previous engine mode").
     until ship:verticalSpeed >=0 {
-
         if threengines = false and ship:verticalspeed >=-100 {
             cluster:doevent("next engine mode").
             set threengines to true.
@@ -218,7 +204,7 @@ wait until h <= max(abs(ship:verticalspeed*3),800).
     set ship:control:top to 0.
     set ship:control:starboard to 0.
     LOCK THROTTLE TO 0.1.
-    wait 30.
+    wait 15.
     toggle ag2. // booster core rcs (drain fuel)
     wait until ship:liquidfuel <=10 or AG10.
     toggle ag10.
