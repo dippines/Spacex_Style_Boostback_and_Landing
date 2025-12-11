@@ -2,13 +2,16 @@
 
 
 //--Variables--\\
+
 set doneprev to false.
 set donenext to false.
 set chosetarget to false.
 set meco to 60000. // Boostback start altitude.
-set x to 10.// lngoff you want
+set x to 0.// lngoff you want
 set cluster to ship:partsnamed("SEP.25.BOOSTER.CLUSTER")[0]:getmodule("ModuleSEPEngineSwitch").
 set dt to 0.2.
+set landingsite to targetland().
+
 //--------Functions--------\\
 
 //--Target--\\
@@ -57,7 +60,7 @@ function targetland {
     }
     return landpos.
 }
-set landingsite to targetland().
+
 //--GetImpact--\\
 
 function getImpact {
@@ -112,20 +115,18 @@ if abs(ship:geoposition:lng) - abs(landingsite:lng) > 0 {
     set k to 1.
 }
 
-set ship:control:top to 1.
-until vang(srfRetrograde:vector,ship:facing:forevector) <= 20 {
-    // set ship:control:starboard to (ship:up:pitch - ship:facing:pitch)/abs((ship:up:pitch - ship:facing:pitch)).
-    lock throttle to 0.2.
-    lock steering to srfRetrograde-R(0,0,180). 
-    if doneprev = false and vang(srfRetrograde:vector,ship:facing:forevector) <= 45 {
+until vang(heading(k*landingsite:heading,0):vector,ship:facing:forevector) <= 20 {
+    unlock steering.
+    set ship:control:top to 1.
+    set ship:control:starboard to (ship:up:pitch - ship:facing:pitch)/abs((ship:up:pitch - ship:facing:pitch)).
+    lock throttle to 0.5.
+    if doneprev = false and vang(heading(k*landingsite:heading,0):vector,ship:facing:forevector) <= 45 {
         cluster:doevent("previous engine mode").
         set doneprev to true.
-        lock throttle to 0.5.
     }
 }
 
 until lngoff > x or AG10 {
-    
 
     lock bbt to errorVector():mag/t1:mag.
     set corr to VXCL(ship:sensors:grav,landingsite:position-ship:position). // straight vec from you to landingpos, on the same plan as errorvec.
@@ -154,14 +155,13 @@ until lngoff > x or AG10 {
     //--RCS AND FUEL CONTROL--\\
 
     if vang(heading(k*landingsite:heading+ang, 0):vector,ship:facing:forevector) <= 10 {
-        local ro is ship:facing:roll.
         local lat_error is getimpact():lat-landingsite:lat. 
+        local rcsthrust is (lat_error/abs(lat_error)).
+        local str is round(cos(ship:facing:roll)).
+        local tp is round(sin(ship:facing:roll)). 
         local t is abs(errorVector():mag/ship:velocity:surface:mag).
         local fcalc is ((ship:liquidfuel-9000)/3886.20).
-        local rcsthrust is (lat_error/abs(lat_error)).
-        local str is round(cos(ro)).
-        local tp is round(sin(ro)). 
-        
+
         // Fuel drain
         if round(fcalc) <= abs(round(tin)-round(t)) {
             if ship:liquidfuel >=11000 {
@@ -170,7 +170,7 @@ until lngoff > x or AG10 {
                 ag8 on.
             }
         }
-
+        // Rcs corrections
         if str = 1 or tp = -1{
             set ship:control:starboard to rcsthrust.
         } else {
@@ -179,22 +179,27 @@ until lngoff > x or AG10 {
     }
 
     //--Main Control--\\
-
-    lock steering to R(fdir:pitch,fdir:yaw,65). // idk why 65 but the booster should be flat, qd facing down
+    lock steering to lookdirup(fdir:vector, ship:up:vector)*R(0,0,180).
     lock throttle to abs(min(max(bbt,0.01),1)).
-    // print ("lng error : " + lngoff).
-    // print ("lat error : " + latoff).
-
+    print("lngoff  " + lngoff ).
+    print("latoff  "+ latoff ).
 wait dt.
 }
 
 lock throttle to 0.
-unlock steering.
 set ship:control:starboard to 0.
 set ship:control:top to 0.
+
 wait until ship:verticalspeed<=0.
-lock steering to srfRetrograde+R(0,0,270).
-wait until alt:radar <=75000.
+until vang(srfRetrograde:vector,ship:facing:forevector) <= 25 {
+    unlock steering.
+    set ship:control:top to -0.5.
+    set ship:control:starboard to (ship:up:yaw - ship:facing:yaw)/abs((ship:up:yaw - ship:facing:yaw)).
+}
+set ship:control:starboard to 0.
+set ship:control:top to 0.
+lock steering to srfRetrograde.
+wait until alt:radar <=75000 or ABORT.
 print("Go for landing").
-cluster:doevent("previous engine mode").
+
 stage. // HSR
