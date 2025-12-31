@@ -4,7 +4,7 @@ If you need help : add me : "wigludxombu" on discord
 # Codes : 
 # Starship-Superheavy :
  - Mechazilla : 100%
- - Booster landing : 99% 
+ - Booster landing : 100% 
  - Booster Boostback : 99% 
  - Ship landing : 0%
  - Orbit : 50%
