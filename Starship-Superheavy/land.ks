@@ -103,15 +103,15 @@ function aoax {
     local H1 is round(errorVector():mag).
     local H2 is sign((getimpact():lng-landingsite:lng)). // -1/1 if you are past or ahead (in lng) of landingsite
     local tiltangle is vang(errorvector()-ship:velocity:surface,-ship:velocity:surface). // Tilting angle towards tower
-    local retrangle is vang(-ship:velocity:surface,ship:up:vector). // angle you want to be like ship:up
+    local upangle is vang(-ship:velocity:surface,ship:up:vector). // angle you want to be like ship:up
     local fac is clamp(ship:bounds:bottomaltradar/armsheight,1,5).
     if throttle > 0 {
         if threengines {
-            set maoa[4] to clamp(tiltangle,retrangle,retrangle*fac) -1. // The more you are close to the tower the more you want to be vertical
+            set maoa[4] to clamp(tiltangle,upangle,upangle*fac) -1. // The more you are close to the tower the more you want to be vertical
             set fx to H2.
         } else {
             set fx to f[1].
-            set maoa[4] to retrangle.
+            set maoa[4] to upangle.
         }
     } else {
         if H1 <= radius {
@@ -219,3 +219,4 @@ wait until ship:verticalSpeed <0.
 lock steering to getsteering().
 landingburn().
 wait until ag10. // To end just press ag10.
+
