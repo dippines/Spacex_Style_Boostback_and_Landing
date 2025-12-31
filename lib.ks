@@ -16,35 +16,35 @@ function sign {
 //------Target------\\
 
 function targetland {
-    local target_chosen is false.
-    local selected_pos is geoposition.
-    
-    until target_chosen {
-        clearscreen.
-        print "Select Landing Site (t, a, b, c, w, o):".
-        local char is terminal:input:getchar().
-        
-        if char = "t" and hastarget {
-            set selected_pos to latlng(target:geoposition:lat, target:geoposition:lng).
-            set target_chosen to true.
-        } else if char = "a" {
-            set selected_pos to latlng(25.9962485183524, -97.154732239204).
-            set target_chosen to true.
-        } else if char = "b" {
-            set selected_pos to latlng(25.9967515622019, -97.1579564069524).
-            set target_chosen to true.
-        } else if char = "c" {
-            set selected_pos to latlng(28.6081826102928, -80.601304446744).
-            set target_chosen to true.
-        } else if char = "w" {
-            set selected_pos to latlng(25.9962480647979, -96).
-            set target_chosen to true.
-        } else if char = "o" {
-            set selected_pos to latlng(25.8669450105354, -95.5781057662035).
-            set target_chosen to true.
-        }
+    local sites is lexicon(
+        "a", latlng(25.9962485183524, -97.154732239204), // OLT-A
+        "b", latlng(25.9967515622019, -97.1579564069524), // OLT-B
+        "c", latlng(28.6081826102928, -80.601304446744), // OLT-C
+        "w", latlng(25.9962480647979, -96), // Water test for Superheavy/Starship
+        "3", latlng(34.63310839876, -120.615155971947), // LZ3
+        "2", latlng(28.4877484442497, -80.5449202044373), // LZ2
+        "1", latlng(28.4857625502468, -80.5429426267221) // LZ1
+    ).
+
+    clearscreen.
+    print "Select Landing Site (t, a, b, c, w, o, 1, 2, 3):" AT (0,0).
+    print "Corresponding letters :" AT (0,1).
+    print "t : target" AT (0,2).
+    print "a : OLT-A" AT (0,3).
+    print "b : OLT-B" AT (0,4).
+    print "o : ASOG" AT (0,5).
+    print "w : water test" AT (0,6).
+    print "1 : LZ-1" AT (0,7).
+    print "2 : LZ-2" AT (0,8).
+    print "3 : LZ-3" AT (0,9).
+
+    until false {
+        local getchar is terminal:input:getchar().
+
+        if getchar = "t" and hastarget return target:geoposition.
+        if getchar = "o" return Vessel("ASOG"):geoposition.
+        if sites:haskey(getchar) return sites[getchar].
     }
-    return selected_pos.
 }
 
 //------Steering------\\
