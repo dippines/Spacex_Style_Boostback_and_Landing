@@ -17,13 +17,13 @@ function sign {
 
 function targetland {
     local sites is lexicon(
-        "a", latlng(25.9962485183524, -97.154732239204), // OLT-A
-        "b", latlng(25.9967515622019, -97.1579564069524), // OLT-B
-        "c", latlng(28.6081826102928, -80.601304446744), // OLT-C
-        "w", latlng(25.9962480647979, -96), // Water test for Superheavy/Starship
-        "3", latlng(34.63310839876, -120.615155971947), // LZ3
-        "2", latlng(28.4877484442497, -80.5449202044373), // LZ2
-        "1", latlng(28.4857625502468, -80.5429426267221) // LZ1
+        "a", list(latlng(25.9962485183524, -97.154732239204), "OLT-A"),
+        "b", list(latlng(25.9967515622019, -97.1579564069524), "OLT-B"),
+        "c", list(latlng(28.6081826102928, -80.601304446744), "OLT-C"),
+        "w", list(latlng(25.9962480647979, -96), "Water Test"),
+        "3", list(latlng(34.63310839876, -120.615155971947), "LZ-3"),
+        "2", list(latlng(28.4877484442497, -80.5449202044373), "LZ-2"),
+        "1", list(latlng(28.4857625502468, -80.5429426267221), "LZ-1")
     ).
 
     clearscreen.
@@ -39,11 +39,23 @@ function targetland {
     print "3 : LZ-3" AT (0,9).
 
     until false {
-        local getchar is terminal:input:getchar().
+        local choice is terminal:input:getchar().
+        local selection is list().
 
-        if getchar = "t" and hastarget return target:geoposition.
-        if getchar = "o" return Vessel("ASOG"):geoposition.
-        if sites:haskey(getchar) return sites[getchar].
+        if choice = "t" and hastarget {
+            set selection to list(target:geoposition, "Target: " + target:name).
+        } else if choice = "o" {
+            set selection to list(Vessel("ASOG"):geoposition, "ASOG").
+        } else if sites:haskey(choice) {
+            set selection to sites[choice].
+        }
+
+        if selection:length > 0 {
+            clearscreen.
+            print "Site chosen: " + selection[1] AT (0, 0).
+            wait 1.
+            return selection[0].
+        }
     }
 }
 
@@ -94,17 +106,14 @@ function rcscorrections {
 
 function debug {
     parameter pos.
-    PRINT "Vitesse Surface : " + ROUND(SHIP:VELOCITY:SURFACE:MAG, 1) + " m/s   " AT (0,0).
-    PRINT "Gravite         : " + ROUND(SHIP:SENSORS:GRAV:MAG, 3) + " m/s^2 " AT (0,1).
+    PRINT "Speed           : " + ROUND(SHIP:VELOCITY:SURFACE:MAG)*3.6 + " km/h   " AT (0,1).
     PRINT "Poussee Max     : " + ROUND(SHIP:MAXTHRUST, 2) + " kN      " AT (0,2).
     PRINT "Masse           : " + ROUND(SHIP:MASS, 3) + " t       " AT (0,3).
-    print "Error vector             : " + ROUND(pos:position-ship:geoposition:position):mag + " m       " AT (0,4).
-    print "G force         : " + SHIP:SENSORS:ACC:MAG / CONSTANT:g0 + " m/s^2    " AT (0,6).
+    print "Error vector    : " + ROUND((pos:position-ship:geoposition:position):mag) + " m       " AT (0,4).
+    print "G force         : " + SHIP:SENSORS:ACC:MAG / CONSTANT:g0 + " m/s^2    " AT (0,5).
 }    
 
 function debugvisual {}
-
-
 
 function globallanding {
     // A function that make your vessel lands (no steering control).
