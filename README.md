@@ -4,10 +4,10 @@ If you need help : add me : "wigludxombu" on discord
 # Codes : 
 # Starship-Superheavy :
  - Mechazilla : 100%
- - Booster landing : 99% --> Need to Clean up
- - Booster Boostback : 99% --> Need to Clean up and have more realistic comportment
+ - Booster landing : 99% 
+ - Booster Boostback : 99% 
  - Ship landing : 0%
- - Orbit : 5%
+ - Orbit : 50%
 # Falcon-9 :
  - Boostback : 60% 
  - Booster landing : 99%
