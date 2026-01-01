@@ -34,17 +34,16 @@ function index {
     return 0.
 }
 
-function aoax { 
+function aoa { 
 
     if throttle > 0 {
         local upangle is vang(-ship:velocity:surface, ship:up:vector).
 
         if threengines {
             local tiltangle is vang(errorvector(landingsite)-ship:velocity:surface,-ship:velocity:surface).
-            local fac is clamp(ship:bounds:bottomaltradar/armsheight + 70, 1, 5).
+            local fac is clamp(h/(armsheight + 100), 1, 3).
             set angle[4] to clamp(tiltangle, upangle, upangle * fac).
             set fx to sign(getimpact():lng - landingsite:lng).
-
         } else {
             set angle[4] to upangle.
             set fx to 1.
@@ -61,36 +60,42 @@ function aoax {
 }
 
 function getSteering {
+
     local velVector is -ship:velocity:surface.
     local correctionVector is errorvector(landingsite).
     local result is velVector + correctionVector.
-    local aoa is aoax().
+    local aoa is aoa().
 
     if vang(result, velVector) > aoa {
         set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
     }
-    
+
     rcscorrections(stages[1], landingsite).
     debug(landingsite).
 
     local val is lookdirup(result, facing:topvector).
-    set p to val:pitch.
-    set y to val:yaw.
-    
+    local p is val:pitch.
+    local y is val:yaw.
+
     if threengines {
-        set p to 0.3 * p + 0.7 * ship:up:pitch.
+        local startFunnel is armsheight + 1000.
+        local endFunnel is armsheight.
+        local verticalFactor is clamp((startFunnel - ship:bounds:bottomaltradar) / (startFunnel - endFunnel), 0, 1).
+        set p to (1 - verticalFactor) * p + verticalFactor * ship:up:pitch.
+        set y to (1 - verticalFactor) * y + verticalFactor * ship:up:yaw.
     }
 
+return R(p, y, 270).
 
-    return R(p, y, 270).
 }
+
+
+
 
 //--Throttle--\\
 
 function landingburn {
-    wait until h <= stages[3].
-    wait until h <= max(abs(ship:verticalspeed * 3), 800).
-
+    wait until h <= max(1000,(ship:velocity:surface:mag^2)/(2*(((ship:maxThrust*4.33)/ship:mass)-ship:sensors:grav:mag))).
     lock throttle to 1.
     wait 0.1.
     cluster:doevent("previous engine mode").
@@ -105,10 +110,8 @@ function landingburn {
         }
 
         if ship:verticalspeed <= -300 {
-            set mn to 1.
+            set mn to 0.7.
         } else if ship:verticalspeed <= -100 {
-            set mn to 0.5.
-        } else {
             set mn to 0.
         }
         wait 0.
