@@ -111,7 +111,7 @@ function debug {
     PRINT "Mass            : " + ROUND(SHIP:MASS, 3) + " t       " AT (0,3).
     print "Error vector    : " + ROUND(errorVector(pos):mag) + " m       " AT (0,4).
     print "AoA             : " + vang(ship:facing:vector,ship:velocity:surface) + " °   " AT (0,5).
-    print "Burn alt        : " + (ship:velocity:surface:mag^2)/(2*(((ship:maxThrust*4.33)/ship:mass)-ship:sensors:grav:mag)) + " m " AT (0,6).
+    print "Burn alt        : " + (ship:velocity:surface:mag^2)/(2*((ship:maxThrust/ship:mass)-ship:sensors:grav:mag)) + " m " AT (0,6).
 }    
 
 function debugvisual {}
