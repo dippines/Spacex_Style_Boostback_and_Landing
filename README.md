@@ -28,6 +28,5 @@ If you need help : add me : "wigludxombu" on discord
 
 
 # TO-DO (In order)
-- Clean-up the codes (more readable codes) (once codes are finished) 
-- Put starship in orbit / IFT-like trajectory (Starting around december)
-- Starship precise position landing code (Starting around december)
+- Put starship in orbit / IFT-like trajectory
+- Starship precise position landing code
