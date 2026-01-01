@@ -52,8 +52,8 @@ function targetland {
 
         if selection:length > 0 {
             clearscreen.
-            print "Site chosen: " + selection[1] AT (0, 0).
-            wait 1.
+            print "Landingsite : " + selection[1] AT (0,0).
+            addons:tr:settarget(selection[0]).
             return selection[0].
         }
     }
@@ -62,24 +62,24 @@ function targetland {
 //------Steering------\\
 
 function getImpact {
+
     if addons:tr:hasimpact { 
     return addons:tr:impactpos. 
     }
 return ship:geoposition.
 }
 
-function errorVector {   
+function errorVector {
     parameter pos.
     return pos:position - getImpact():position.
 }
-
 
 function rcscorrections {
     parameter activation, pos.
     if alt:radar <= activation {
         local ro is ship:facing:roll.
-        local lngoff is ship:geoposition:lng - pos:lng.
-        local latoff is ship:geoposition:lat - pos:lat.
+        local lngoff is getimpact():lat - pos:lng.
+        local latoff is getimpact():lat - pos:lat.
         local top_cmd is (-latoff * COS(ro)) - (lngoff * SIN(ro)).
         local starboard_cmd is (-latoff * SIN(ro)) + (lngoff * COS(ro)).
 
@@ -107,10 +107,11 @@ function rcscorrections {
 function debug {
     parameter pos.
     PRINT "Speed           : " + ROUND(SHIP:VELOCITY:SURFACE:MAG)*3.6 + " km/h   " AT (0,1).
-    PRINT "Poussee Max     : " + ROUND(SHIP:MAXTHRUST, 2) + " kN      " AT (0,2).
-    PRINT "Masse           : " + ROUND(SHIP:MASS, 3) + " t       " AT (0,3).
-    print "Error vector    : " + ROUND((pos:position-ship:geoposition:position):mag) + " m       " AT (0,4).
-    print "G force         : " + SHIP:SENSORS:ACC:MAG / CONSTANT:g0 + " m/s^2    " AT (0,5).
+    PRINT "Max Thrust      : " + ROUND(SHIP:MAXTHRUST, 2) + " kN      " AT (0,2).
+    PRINT "Mass            : " + ROUND(SHIP:MASS, 3) + " t       " AT (0,3).
+    print "Error vector    : " + ROUND(errorVector(pos):mag) + " m       " AT (0,4).
+    print "AoA             : " + vang(ship:facing:vector,ship:velocity:surface) + " °   " AT (0,5).
+    print "Burn alt        : " + (ship:velocity:surface:mag^2)/(2*(((ship:maxThrust*4.33)/ship:mass)-ship:sensors:grav:mag)) + " m " AT (0,6).
 }    
 
 function debugvisual {}
@@ -149,7 +150,7 @@ function globalsteering {
     local velVector is -ship:velocity:surface.
     local correctionVector to errorVector(pos).
     local result is velVector + correctionVector.
-    local aoa is aoax(). 
+    local aoa is aoa(). 
 
     if vang(result, velVector) > aoa {
         set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
