@@ -39,22 +39,19 @@ function getSteering { // Modified version of Edwin Roberts one
     rcscorrections(1000000, landingsite).
     debug(landingsite).
     // debugvisual(landingsite).
-    
-    if not oneengine {
+
+    if oneengine = false {
 
         local velVector is -ship:velocity:surface.
         local correctionVector is errorvector(landingsite).
-        local result is velVector + correctionVector.
+        set result to velVector + correctionVector.
         local aoa is aoa().
-
-        if oneengine = false. {
-            global burnalt is (ship:velocity:surface:mag^2 * (2 * (ship:maxThrust / ship:mass) - 3 * ship:sensors:grav:mag)) / (2 * ((ship:maxThrust / ship:mass) - ship:sensors:grav:mag) * ((ship:maxThrust / ship:mass) - 3 * ship:sensors:grav:mag)).
-        } // Burn altitude calculation, knowing that during the burn you will go from 3 to 1 engine (simplified version of (burnaltonengine + burnaltthreengine)/2
+        global burnalt is (ship:velocity:surface:mag^2 * (2 * (ship:maxThrust / ship:mass) - 3 * ship:sensors:grav:mag)) / (2 * ((ship:maxThrust / ship:mass) - ship:sensors:grav:mag) * ((ship:maxThrust / ship:mass) - 3 * ship:sensors:grav:mag)).
+        // Burn altitude calculation, knowing that during the burn you will go from 3 to 1 engine (simplified version of (burnaltonengine + burnaltthreengine)/2
         
         if vang(result, velVector) > aoa {
             set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
         }
-        
     
     } else {
         
@@ -63,7 +60,7 @@ function getSteering { // Modified version of Edwin Roberts one
         local maxD is sqrt(aTot^2 - ship:sensors:grav:mag^2).
         local dist is vxcl(upvec, landingsite:position):mag.
 
-        if dist > (ship:groundspeed^2) / (2 * maxD) and dist > 1 {
+        if dist > (ship:groundspeed^2) / (2 * maxD) and dist > 10 {
             set result to vxcl(upvec, landingsite:position):normalized + upvec / tan(max(0.1, currentTilt)).
         } else {
             local aH is clamp(ship:groundspeed - sqrt(2 * maxD * dist), 0, aTot * sin(currentTilt)).
@@ -86,19 +83,19 @@ function reentryburn {
 function landingburn {
 wait until alt:radar <= 1000. // Safety Measure
 wait until alt:radar <= burnalt.
-    until ship:bounds:bottomaltradar <= LZOFF + 5 { // +5 => safety measure + the legs are approximately 3 meters high
+    
+    lock throttle to clamp(((ship:velocity:surface:mag^2)/(2*ship:sensors:grav:mag*(ship:bounds:bottomaltradar-LZOFF))),0,1).
+
+    until ship:verticalspeed >-5 {
         
         if oneengine = false and ship:verticalspeed >=-150 and (SHIP:SENSORS:ACC:MAG / CONSTANT:g0) < 3 {
             ship:partsnamed("TE.19.F9.S1.Engine")[0]:getmodule("ModuleTundraEngineSwitch"):doevent("next engine mode").
             set oneengine to true.
             gear on.
         }
-        if ag2 {
-            lock throttle to 0.
-        }
-        lock throttle to clamp(((ship:velocity:surface:mag^2)/(2*ship:sensors:grav:mag*(ship:bounds:bottomaltradar-lzoff))),0,1).
+
     }
-wait 4.
+    
 toggle brakes.
     toggle ag10.
 }
