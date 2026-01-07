@@ -23,20 +23,18 @@ function targetland {
         "w", list(latlng(25.9962480647979, -96), "Water Test"),
         "3", list(latlng(34.63310839876, -120.615155971947), "LZ-3"),
         "2", list(latlng(28.4877484442497, -80.5449202044373), "LZ-2"),
-        "1", list(latlng(28.4857625502468, -80.5429426267221), "LZ-1")
+        "1", list(latlng(28.4857625502468, -80.5429426267221), "LZ-1"),
+        "e", list(latlng(24.25232066412613, -75.99558085431913), "Exodus Sound"),
+        "j", list(latlng(28.4213006585212,-78.4614638010635), "Jacklyn"),
+        "x", list(getimpact(),"Anywhere")
     ).
 
     clearscreen.
-    print "Select Landing Site (t, a, b, c, w, o, 1, 2, 3):" AT (0,0).
+    print "Select Landing Site :" AT (0,0).
     print "Corresponding letters :" AT (0,1).
-    print "t : target" AT (0,2).
-    print "a : OLT-A" AT (0,3).
-    print "b : OLT-B" AT (0,4).
-    print "o : ASOG" AT (0,5).
-    print "w : water test" AT (0,6).
-    print "1 : LZ-1" AT (0,7).
-    print "2 : LZ-2" AT (0,8).
-    print "3 : LZ-3" AT (0,9).
+    for key in sites:keys {
+        print key + " : " + sites[key][1].
+    }
 
     until false {
         local choice is terminal:input:getchar().
@@ -76,12 +74,14 @@ function errorVector {
 
 function rcscorrections {
     parameter activation, pos.
-    if alt:radar <= activation {
+    if alt:radar <= activation and alt:radar >= 200{
+
+        set lngerr to ship:geoposition:lat - pos:lng.
+        set laterr to ship:geoposition:lat - pos:lat.
+
         local ro is ship:facing:roll.
-        local lngoff is getimpact():lat - pos:lng.
-        local latoff is getimpact():lat - pos:lat.
-        local top_cmd is (-latoff * COS(ro)) - (lngoff * SIN(ro)).
-        local starboard_cmd is (-latoff * SIN(ro)) + (lngoff * COS(ro)).
+        local top_cmd is (-laterr * COS(ro)) - (lngerr * SIN(ro)).
+        local starboard_cmd is (-laterr * SIN(ro)) + (lngerr * COS(ro)).
 
         if top_cmd > 0 {
             set SHIP:CONTROL:TOP to 1.
@@ -103,58 +103,123 @@ function rcscorrections {
 
 //------Misc------\\
 
+function falconlanded {
+clearScreen.
+print "                                      ".
+print "                                      ".
+print "                 | |                  ".
+print "                -|-|-                 ".
+print "                 | |                  ".
+print "                 | |                  ".
+print "                 | |                  ".
+print "                 | |                  ".
+print "                 | |                  ".
+print "                 | |                  ".
+print "                 | |                  ".
+print "                 |.|                  ".
+print "                /|||\                 ".
+print "               / ||| \                ".
+print "              / /|||\ \               ".
+print "             /_/  |  \_\              ".
+print "  ____            *                   ".
+print "  [  ]            *             |__   ".
+print "  [__]__________________________[]/   ".
+print "                                      ".
+print "           BOOSTER LANDED             ".
+}
+
+function heavycatched {
+clearScreen.
+print "----------------------------------".
+print "    ______                        ".
+print "    |/|\|/                        ".
+print "    |/|\|_____ -|-|-              ".
+print "    |/|\|%%%%/  | |               ".
+print "    |/|\|       | |               ".
+print "    |/|\|       |_|               ".
+print "    |/|\|       |_|               ".
+print "    |/|\|       | |               ".
+print "    |/|\|       | |               ".
+print "    |/|\|       | |               ".
+print "    |/|\|        *                ".
+print "    |/|\|        *                ".
+print "    |/|\|         *               ".
+print "    |/|\|          *              ".
+print "    |/|\|          *              ".
+print "    |/|\|                         ".
+print "    |/|\|     __   __             ".
+print "    |/|\|     __   __             ".
+print "    |/|\|     __   __             ".
+print "    |/|\|     __   __             ".
+print "    |/|\|    /=======\            ".
+print "    |/|\|   /=========\           ".
+print "----------------------------------".
+print "Heavy Booster Catched Succesfully".                                             
+}
+
+function newglennlanded {
+clearScreen.
+print "                                      ".
+print "                                      ".
+print "               |[][][]|               ".
+print "               |[][][]|               ".
+print "              /|[]/\[]|\              ".
+print "              \|[]\/[]|/              ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "               |      |               ".
+print "              /|      |\              ".
+print "             | |      | |             ".
+print "             | |      | |             ".
+print "             | |      | |             ".
+print "             | |      | |             ".
+print "             | |      | |             ".
+print "              \|[][][]|/              ".
+print "              '|[][][]|'               ".
+print "             '/|[]||[]|\'              ".
+print "            '/    ||    \'             ".
+print "            '    ''     '            ".
+print "     [][]                    [][]     ".
+print "     [][]____________________[][]     ".
+print "                                      ".
+print "      New Glenn Landed Succesfully    ".                                             
+}
+
 
 function debug {
     parameter pos.
     PRINT "Speed           : " + ROUND(SHIP:VELOCITY:SURFACE:MAG)*3.6 + " km/h   " AT (0,1).
     PRINT "Max Thrust      : " + ROUND(SHIP:MAXTHRUST, 2) + " kN      " AT (0,2).
     PRINT "Mass            : " + ROUND(SHIP:MASS, 3) + " t       " AT (0,3).
-    print "Error vector    : " + ROUND(errorVector(pos):mag) + " m       " AT (0,4).
+    print "Error vector    : " + round(errorVector(pos):mag) + " m       " AT (0,4).
     print "AoA             : " + vang(ship:facing:vector,ship:velocity:surface) + " °   " AT (0,5).
-    print "Burn alt        : " + (ship:velocity:surface:mag^2)/(2*((ship:maxThrust/ship:mass)-ship:sensors:grav:mag)) + " m " AT (0,6).
-}    
-
-function debugvisual {}
-
-function globallanding {
-    // A function that make your vessel lands (no steering control).
-    // It start at activationalt and will land you either at 'offset' ground level (if offset 120, you will have 0 velocity at 120 meter)
-    // Condition block 1 is a block that you can add or delete and that will do something under a certain circonstance (next engine, gears etc), as it is in a loop, bools need to be false prior to the start of the function.
-    // F.Y.I. : You can add a counter to the condition block to do some action a certain amount of time just be aware of kOS tick rate
-    
-    parameter activationalt.
-    parameter offset is 0.
-    set bool1 to false.
-    wait until alt:radar <= activationalt.
-        until ship:verticalspeed >=0 {
-
-            // Condition Block 1
-            
-            if bool1 = false and ship:verticalspeed >= -100 { // Exemple with ship:verticalspeed >= -100 as a condition
-                // The actions you want the vessel to do once
-                toggle ag1.
-                toggle gear.
-                // action is finished and will happen only once
-                set bool1 to true.
-            }
-
-
-        lock throttle to min(max(((ship:velocity:surface:mag^2)/(2*ship:sensors:grav:mag*(ship:bounds:bottomaltradar-offset))),0),1).
-    }
-
+    print "Burn alt        : " + (ship:velocity:surface:mag^2)/(2*((ship:maxThrust/ship:mass)-9.81)) + " m " AT (0,6).
+    print "Throttle        : " + throttle AT (0,7).
+    print "Gs              : " + (SHIP:SENSORS:ACC:MAG / CONSTANT:g0) AT (0,8).
 }
 
-function globalsteering {
-    // Steering function made by Edwin Roberts on github
-    parameter pos. // Your landingsite
-    local velVector is -ship:velocity:surface.
-    local correctionVector to errorVector(pos).
-    local result is velVector + correctionVector.
-    local aoa is aoa(). 
-
-    if vang(result, velVector) > aoa {
-        set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
-    }
-
-    return lookdirup(result, facing:topvector).
+function debugvisual {
+    parameter pos.
+    clearVecDraws().
+    SET anArrow TO VECDRAW(V(0,0,0),-ship:velocity:surface,rgba(255, 0, 0, 1),"-ship:velocity:surface",1.0,TRUE,0.2,TRUE,TRUE).
+    SET anArro TO VECDRAW(V(0,0,0),errorVector(pos),rgba(0, 0, 255, 1),"errorVector",1.0,TRUE,0.2,TRUE,TRUE).
+    SET anArr TO VECDRAW(V(0,0,0),pos:position-ship:position,RGB(0,1,0),"vectopad",1.0,TRUE,0.2,TRUE,TRUE).
+    // SET anAr TO VECDRAW(V(0,0,0),tstvec2,RGB(0,1,0),"See the arrow?",1.0,TRUE,0.2,TRUE,TRUE).
+    // SET anA TO VECDRAW(V(0,0,0),tstvec2,RGB(0,1,0),"See the arrow?",1.0,TRUE,0.2,TRUE,TRUE).
+    // SET an TO VECDRAW(V(0,0,0),tstvec2,RGB(0,1,0),"See the arrow?",1.0,TRUE,0.2,TRUE,TRUE).
+    // SET a TO VECDRAW(V(0,0,0),tstvec2,RGB(0,1,0),"See the arrow?",1.0,TRUE,0.2,TRUE,TRUE).
+// 
 }
