@@ -27,7 +27,7 @@ function aoa {
         if oneengine {
             set maoa to clamp(tiltangle,0,retrangle*2). // For those last corrections, you are clamped between retrograde and 5*the angle to be up
         } else {
-            set maoa to retrangle. // Idk either this or 0, for superheavy this would be retrangle
+            set maoa to 0.
         }
     } else {
         set maoa to -ang. // If it don't work try just ang
@@ -60,7 +60,7 @@ function getSteering { // Modified version of Edwin Roberts one
         local maxD is sqrt(aTot^2 - ship:sensors:grav:mag^2).
         local dist is vxcl(upvec, landingsite:position):mag.
 
-        if dist > (ship:groundspeed^2) / (2 * maxD) and dist > 10 {
+        if dist > (ship:groundspeed^2) / (2 * maxD) and dist > 5 {
             set result to vxcl(upvec, landingsite:position):normalized + upvec / tan(max(0.1, currentTilt)).
         } else {
             local aH is clamp(ship:groundspeed - sqrt(2 * maxD * dist), 0, aTot * sin(currentTilt)).
