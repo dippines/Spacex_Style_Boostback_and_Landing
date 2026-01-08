@@ -4,13 +4,13 @@ If you need help : add me : "wigludxombu" on discord
 # Codes : 
 # Starship-Superheavy :
  - Mechazilla : 100%
- - Booster landing : 100% 
+ - Booster landing : 95% 
  - Booster Boostback : 90% 
  - Ship landing : 0%
  - Orbit : 50%
 # Falcon-9 :
  - Boostback : 60% 
- - Booster landing : 100%
+ - Booster landing : 99%
  - Buoy cam : 20%
 
  # Dependencies :
