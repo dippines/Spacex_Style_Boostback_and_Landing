@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------------------LANDING SCRIPT-------------------------------------------------------------------------------\\
 clearscreen.
 //--Variables--\
+set upvec to ship:up:vector.
 
 //--Lib calls--\\
 
@@ -10,97 +11,81 @@ set landingsite to targetland().
 //--Booster--\\
 set threengines to false.
 set cluster to ship:partsnamed("SEP.25.BOOSTER.CLUSTER")[0]:getmodule("ModuleSEPEngineSwitch").
+cluster:doevent("previous engine mode"). // 13 engines
 set boosteroffset to 70. // booster height
 set shipbox to ship:bounds.
 lock h to shipbox:bottomaltradar+boosteroffset. // The top altitude of the booster
 set armsheight to 130+max(landingsite:terrainheight,0).
 
 
-set stages to list(80000,25000,10000,2500,0). // The stagess of your flight. Feel free to change
-set angle to list(2,6,7,4,2). // each value represent the max angle from retrograde you want during each stages of the flight in stages, they have the same index number. Feel free to change
-
 //--------Functions--------\\
 
 //--Steering--\\
 
-
-
-function index {
-    local idx is 0.
-    until idx >= stages:length {
-        if alt:radar > stages[idx] return idx.
-        set idx to idx + 1.
-    }
-    return 0.
-}
-
 function aoa { 
 
     if throttle > 0 {
-        local upangle is vang(-ship:velocity:surface, ship:up:vector).
+        // local upangle is vang(-ship:velocity:surface, upvec).
 
         if threengines {
-            local tiltangle is vang(errorvector(landingsite)-ship:velocity:surface,-ship:velocity:surface).
-            local fac is clamp(h/(armsheight + 100), 1, 3).
-            set angle[4] to clamp(tiltangle, upangle, upangle * fac).
-            set fx to sign(getimpact():lng - landingsite:lng).
+            // local tiltangle is vang(errorvector(landingsite)-ship:velocity:surface,-ship:velocity:surface).
+            set angle to 5.
         } else {
-            set angle[4] to upangle.
-            set fx to 1.
+            set angle to 0.
         }
     } else {
-        if errorVector(landingsite):mag <= 5 { // 10 meter precision
-            set fx to 1.
-        } else {
-            set fx to -1.
-        }
-    }
+        set angle to -clamp(round(vang(-ship:velocity:surface,-ship:velocity:surface+2*errorvector(landingsite))),0,10).
+    } 
 
-    return angle[index()] * fx.
+    return angle.
 }
 
 function getSteering {
-
-    local velVector is -ship:velocity:surface.
-    local correctionVector is errorvector(landingsite).
-    local result is velVector + correctionVector.
-    local aoa is aoa().
-
-    if vang(result, velVector) > aoa {
-        set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
-    }
-
-    rcscorrections(stages[1], landingsite).
+    rcscorrections(50000, landingsite).
     debug(landingsite).
+
+
+    if threengines = false {
+
+        local velVector is -ship:velocity:surface.
+        local correctionVector is errorvector(landingsite).
+        set result to velVector + correctionVector.
+        local aoa is aoa().
+        global burnalt is (ship:velocity:surface:mag^2)/(2*((ship:maxThrust/ship:mass)-ship:sensors:grav:mag)).
+        
+        if vang(result, velVector) > aoa {
+            set result to velVector:normalized + tan(aoa) * correctionVector:normalized.
+        }
+        
+    } else {
+        
+        local currentTilt is clamp(h-armsheight / burnalt, 0, 1) * aoa().
+        local aTot is ship:availablethrust / ship:mass.
+        local maxD is sqrt(aTot^2 - ship:sensors:grav:mag^2).
+        local dist is vxcl(upvec, landingsite:position):mag.
+
+        if dist > (ship:groundspeed^2) / (2 * maxD) and dist > 10 {
+            set result to vxcl(upvec, landingsite:position):normalized + upvec / tan(max(0.1, currentTilt)).
+        } else {
+            local aH is clamp(ship:groundspeed - sqrt(2 * maxD * dist), 0, aTot * sin(currentTilt)).
+            set result to -vxcl(upvec, ship:velocity:surface):normalized * aH + upvec * sqrt(max(0, aTot^2 - aH^2)).
+        }
+    }
 
     local val is lookdirup(result, facing:topvector).
     local p is val:pitch.
     local y is val:yaw.
 
-    if threengines {
-        local startFunnel is armsheight + 1000.
-        local endFunnel is armsheight.
-        local verticalFactor is clamp((startFunnel - ship:bounds:bottomaltradar) / (startFunnel - endFunnel), 0, 1).
-        set p to (1 - verticalFactor) * p + verticalFactor * ship:up:pitch.
-        set y to (1 - verticalFactor) * y + verticalFactor * ship:up:yaw.
-    }
-
 return R(p, y, 270).
 
 }
 
-
-
-
 //--Throttle--\\
 
 function landingburn {
-    wait until h <= max(1000,(ship:velocity:surface:mag^2)/(2*(((ship:maxThrust*4.33)/ship:mass)-ship:sensors:grav:mag))).
-    lock throttle to 1.
-    wait 0.1.
-    cluster:doevent("previous engine mode").
-
-    local mn is 1.
+    wait until h <= 2000.
+    wait until h <= max(800,burnalt).
+    local mn is 0.
     lock throttle to clamp((ship:velocity:surface:mag^2) / (2 * ship:sensors:grav:mag * (h - armsheight)), mn, 1).
 
     until ship:verticalSpeed >= 0 {
@@ -110,7 +95,7 @@ function landingburn {
         }
 
         if ship:verticalspeed <= -300 {
-            set mn to 0.7.
+            set mn to 0.5.
         } else if ship:verticalspeed <= -100 {
             set mn to 0.
         }
@@ -119,9 +104,8 @@ function landingburn {
 
     RCS off.
     stage.
-    set ship:control:top to 0.
-    set ship:control:starboard to 0.
-    lock throttle to 0.1.
+
+    heavycatched().
     wait 15.
     toggle ag2.
     wait until ship:liquidfuel <= 10 or AG10.
